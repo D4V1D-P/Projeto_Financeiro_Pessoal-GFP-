@@ -41,22 +41,22 @@ Route::put('/categoria_entrada/{id}', [CategoriaEntradaController::class, 'updat
 Route::delete('/categoria_entrada/{id}', [CategoriaEntradaController::class, 'destroy']);
 
 //Rotas para o CRUD da CategoriaSaida
-Route::get('/CategoriaSaida', [CategoriaEntradaController::class, 'index']);
-Route::get('/CategoriaSaida/{codigo}', [CategoriaEntradaController::class, 'show']);
-Route::post('/CategoriaSaida', [CategoriaEntradaController::class, 'store']);
-Route::put('/CategoriaSaida/{id}', [CategoriaEntradaController::class, 'update']);
-Route::delete('/CategoriaSaida/{id}', [CategoriaEntradaController::class, 'destroy']);
+Route::get('/CategoriaSaida', [CategoriaSaidaController::class, 'index']);
+Route::get('/CategoriaSaida/{codigo}', [CategoriaSaidaController::class, 'show']);
+Route::post('/CategoriaSaida', [CategoriaSaidaController::class, 'store']);
+Route::put('/CategoriaSaida/{id}', [CategoriaSaidaController::class, 'update']);
+Route::delete('/CategoriaSaida/{id}', [CategoriaSaidaController::class, 'destroy']);
 
 //Rotas para o CRUD da Conta
-Route::get('/Conta', [CategoriaEntradaController::class, 'index']);
-Route::get('/Conta/{codigo}', [CategoriaEntradaController::class, 'show']);
-Route::post('/Conta', [CategoriaEntradaController::class, 'store']);
-Route::put('/Conta/{id}', [CategoriaEntradaController::class, 'update']);
-Route::delete('/Conta/{id}', [CategoriaEntradaController::class, 'destroy']);
+Route::get('/Conta', [ContaController::class, 'index']);
+Route::get('/Conta/{codigo}', [ContaController::class, 'show']);
+Route::post('/Conta', [ContaController::class, 'store']);
+Route::put('/Conta/{id}', [ContaController::class, 'update']);
+Route::delete('/Conta/{id}', [ContaController::class, 'destroy']);
 
 //Rotas para o CRUD do tipo de pagamento
-Route::get('/tipo_pagamento', [CategoriaEntradaController::class, 'index']);
-Route::get('/tipo_pagamento/{codigo}', [CategoriaEntradaController::class, 'show']);
-Route::post('/tipo_pagamento', [CategoriaEntradaController::class, 'store']);
-Route::put('/tipo_pagamento/{id}', [CategoriaEntradaController::class, 'update']);
-Route::delete('/tipo_pagamento/{id}', [CategoriaEntradaController::class, 'destroy']);
+Route::get('/tipo_pagamento', [TipoPagamentoController::class, 'index']);
+Route::get('/tipo_pagamento/{codigo}', [TipoPagamentoController::class, 'show']);
+Route::post('/tipo_pagamento', [TipoPagamentoController::class, 'store']);
+Route::put('/tipo_pagamento/{id}', [TipoPagamentoController::class, 'update']);
+Route::delete('/tipo_pagamento/{id}', [TipoPagamentoController::class, 'destroy']);

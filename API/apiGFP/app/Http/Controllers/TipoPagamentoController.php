@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\TipoPagamento;
+use App\Models\tipo_pagamento;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
@@ -13,7 +13,7 @@ class TipoPagamentoController extends Controller
     // Mostrar registros
     public function index()
     {
-        $registros = TipoPagamento::all();
+        $registros = tipo_pagamento::all();
         $contador = $registros->count();
 
         if ($contador > 0) {
