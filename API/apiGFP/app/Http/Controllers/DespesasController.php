@@ -54,7 +54,7 @@ class DespesasController extends Controller
             ], 400);
         }
 
-        $registros = despesa::create($request->all());
+        $registros = despesas::create($request->all());
 
         if ($registros) {
             return response()->json([
@@ -73,7 +73,7 @@ class DespesasController extends Controller
     // Mostrar despesa por ID
     public function show($id)
     {
-        $registros = despesa::find($id);
+        $registros = despesas::find($id);
 
         if ($registros) {
             return response()->json([
@@ -111,7 +111,7 @@ class DespesasController extends Controller
             ], 400);
         }
 
-        $registroBanco = despesa::find($id);
+        $registroBanco = despesas::find($id);
 
         if (!$registroBanco) {
             return response()->json([
@@ -147,7 +147,7 @@ class DespesasController extends Controller
     // Deletar Despesa
     public function destroy($id)
     {
-        $registroBanco = despesa::find($id);
+        $registroBanco = despesas::find($id);
 
         if (!$registroBanco) {
             return response()->json([
