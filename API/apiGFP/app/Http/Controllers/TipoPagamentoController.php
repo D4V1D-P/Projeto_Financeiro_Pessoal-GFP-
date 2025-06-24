@@ -49,7 +49,7 @@ class TipoPagamentoController extends Controller
             ], 400);
         }
 
-        $registros = TipoPagamento::create($request->all());
+        $registros = tipo_pagamento::create($request->all());
 
         if ($registros) {
             return response()->json([
@@ -68,7 +68,7 @@ class TipoPagamentoController extends Controller
     // Mostrar o Tipo de pagamento por ID
     public function show($id)
     {
-        $registros = TipoPagamento::find($id);
+        $registros = tipo_pagamento::find($id);
 
         if ($registros) {
             return response()->json([
@@ -102,7 +102,7 @@ class TipoPagamentoController extends Controller
             ], 400);
         }
 
-        $registroBanco = TipoPagamento::find($id);
+        $registroBanco = tipo_pagamento::find($id);
 
         if (!$registroBanco) {
             return response()->json([
@@ -133,7 +133,7 @@ class TipoPagamentoController extends Controller
     // Deletar o tipo de pagamento
     public function destroy($id)
     {
-        $registroBanco = TipoPagamento::find($id);
+        $registroBanco = tipo_pagamento::find($id);
 
         if (!$registroBanco) {
             return response()->json([
