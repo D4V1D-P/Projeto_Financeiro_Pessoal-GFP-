@@ -9,8 +9,20 @@ use App\Http\Controllers\CategoriaEntradaController;
 use App\Http\Controllers\CategoriaSaidaController;
 use App\Http\Controllers\ContaController;
 use App\Http\Controllers\TipoPagamentoController;
+use App\Models\Usuarios;
+use Kreait\Firebase\Auth;
+use Kreait\Firebase\Factory;
+use Lcobucci\JWT\Token as TokenInterface;
 
-Route::get('/', function(){return response()->json(['sucesso'=>true]);});
+
+Route::middleware(['firebase.auth'])->group(function () {
+    Route::get('/usuarios', [UsuariosController::class, 'index']);
+});
+
+
+Route::get('/', function () {
+    return response()->json(['sucesso' => true]);
+});
 
 //Rotas para o CRUD dos usuários
 Route::get('/usuarios', [UsuariosController::class, 'index']);
@@ -60,3 +72,40 @@ Route::get('/tipo_pagamento/{codigo}', [TipoPagamentoController::class, 'show'])
 Route::post('/tipo_pagamento', [TipoPagamentoController::class, 'store']);
 Route::put('/tipo_pagamento/{id}', [TipoPagamentoController::class, 'update']);
 Route::delete('/tipo_pagamento/{id}', [TipoPagamentoController::class, 'destroy']);
+
+Route::post('/registrar', function (Request $request) {
+    $token = $request->bearerToken();
+
+    if (!$token) {
+        return response()->json(['erro' => 'Token não fornecido'], 401);
+    }
+
+    try {
+        $auth = (new Factory)
+            ->withServiceAccount(storage_path('app/firebase/firebase_credentials.json'))
+            ->createAuth();
+
+        $verifiedIdToken = $auth->verifyIdToken($token);
+        $uid = $verifiedIdToken->claims()->get('sub');
+    } catch (\Throwable $e) {
+        return response()->json(['erro' => 'Token inválido'], 401);
+    }
+
+    if (!isset($uid)) {
+        return response()->json(['erro' => 'UID não encontrado'], 401);
+    }
+
+    // Cria ou atualiza o usuário no MySQL
+    $usuario = Usuarios::updateOrCreate(
+        ['uid' => $uid],
+        [
+            'nome_usuario' => $request->nome,
+            'email' => $request->email,
+            'telefone' => $request->telefone,
+            'descricao' => $request->descricao,
+            'status' => $request->status ?? 1
+        ]
+    );
+
+    return response()->json(['sucesso' => true, 'usuario' => $usuario]);
+});

@@ -12,6 +12,7 @@ class usuarios extends Model
         'nome_usuario',
         'email',
         'descricao',
-        'status'
+        'status',
+        'uid'
     ];
 }

@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { Link } from "react-router-dom/cjs/react-router-dom"
 import { useEffect } from "react"
 import { faPlusCircle, faMinusCircle, faChartSimple, faListCheck, faCreditCard, faMoneyBill, faBars } from '@fortawesome/free-solid-svg-icons'
@@ -7,8 +7,13 @@ import '../css/style.css'
 import NavDropdown from 'react-bootstrap/NavDropdown'
 import { useLocation } from 'react-router-dom'
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min"
+import { auth } from "../firebase";
+import { signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+import axios from 'axios';
 
-const Sidebar = () => {
+const Sidebar = async () => {
     const location = useLocation()
     useEffect(() => {
         const menuItems = document.querySelectorAll('.areaMenu')
@@ -24,9 +29,54 @@ const Sidebar = () => {
     }, [location.pathname])
 
     const history = useHistory()
-    const Sair = () => {
-        history.push('/')
+
+    const Sair = async () => {
+    try {
+      await signOut(auth);
+      history.replace("/");
+      console.log("Logout realizado com sucesso!");
+    } catch (error) {
+      console.log(error);
     }
+  };
+  
+  const [nome_usuario, setNome_Usuario] = useState('')
+  
+  useEffect(() => {
+    const db = getFirestore();
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const docRef = doc(db, "usuarios", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          console.log(data);
+          console.log(user);
+          console.log(data.nome_usuario || "");
+          console.log(data.telefone || "");
+          console.log(user.email || "");
+          console.log(user.uid || "");
+          console.log(data.descricao || "");
+          setNome_Usuario(data.nome_usuario || "Usuário");
+        }
+      }
+    };
+    fetchUserData();
+  }, []);
+
+  const token = await auth().currentUser.getIdToken()
+
+    await axios.post('http://localhost:8000/api/registrar', {
+    nome: 'Bianca',
+    email: 'bianca@email.com',
+    telefone: '123456789'
+    }, {
+    headers: {
+        Authorization: `Bearer ${token}`
+    }
+    })
+
 
     return (
         <>
@@ -132,7 +182,7 @@ const Sidebar = () => {
 
                         </div>
                     </div>
-                    <button className="botao mb-3 btnnav" onClick={Sair}>sair</button>
+                    <button className="botao mb-3 btnnav" onClick={Sair}>{nome_usuario}</button>
                 </div>
             </div>
         </>

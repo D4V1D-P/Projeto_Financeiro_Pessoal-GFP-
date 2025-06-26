@@ -1,24 +1,9 @@
 <?php
 
-namespace App\Providers;
+use Kreait\Firebase\Factory;
 
-use Illuminate\Support\ServiceProvider;
+$firebase = (new Factory)
+    ->withServiceAccount(storage_path('app/firebase/firebase_credentials.json'));
 
-class AppServiceProvider extends ServiceProvider
-{
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
+$auth = $firebase->createAuth();
 
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        //
-    }
-}

@@ -11,7 +11,7 @@ function Login({navigation}) {
   const [isCadastro, setIsCadastro] = useState(false);
 
   const [email, setEmail] = useState("");
-  const [nome, setNome] = useState("");
+  const [nome_usuario, setNome_Usuario] = useState("");
   const [password, setPassword] = useState("");
   const [telefone, setTelefone] = useState("");
   const [error, setError] = useState("");
@@ -32,7 +32,7 @@ function Login({navigation}) {
 const handleCadastro = async (e) => {
   e.preventDefault();
 
-  if (!nome || !email || !password || !telefone) {
+  if (!nome_usuario || !email || !password || !telefone) {
     setError("Todos os campos são obrigatórios.");
     return;
   }
@@ -46,7 +46,7 @@ const handleCadastro = async (e) => {
     const user = userCredential.user;
 
     await setDoc(doc(db, "usuarios", user.uid), {
-      nome,
+      nome_usuario,
       telefone,
     });
 
@@ -78,11 +78,11 @@ const handleCadastro = async (e) => {
                 required
                 type="text"
                 id="nome"
-                name="nome"
+                name="nome_usuario"
                 className="input"
-                placeholder="Insira seu email"
-                onChange={(e)=>setNome(e.target.value)}
-                value={nome}
+                placeholder="Insira seu nome"
+                onChange={(e)=>setNome_Usuario(e.target.value)}
+                value={nome_usuario}
               />
             </div>
             <div className="campoLabel w-100">
