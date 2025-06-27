@@ -38,7 +38,7 @@ class CategoriaSaidaController extends Controller
             'id_CategoriaSaida' => 'required',
             'id_usuario' => 'required',
             'nome' => 'required',
-            'status' => 'required',
+            'status' => '',
             'uid' => 'required'
         ]);
 
