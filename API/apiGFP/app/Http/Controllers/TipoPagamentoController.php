@@ -38,7 +38,7 @@ class TipoPagamentoController extends Controller
             'id_Tipo_pagamento' => 'required',
             'id_usuario' => 'required',
             'nome' => 'required',
-            
+            'uid' => 'required'
         ]);
 
         if ($validator->fails()) {

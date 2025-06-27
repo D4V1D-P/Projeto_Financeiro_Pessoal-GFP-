@@ -41,7 +41,7 @@ class ContaController extends Controller
             'descricao_banco' => 'required',
             'saldo' => 'required',
             'status' => 'required',
-            
+            'uid' => 'required'
         ]);
 
         if ($validator->fails()) {

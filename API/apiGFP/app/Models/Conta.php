@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Conta extends Model
 {
+    public $timestamps = false;
     protected $fillable = [
         'id_conta',
         'id_usuario',

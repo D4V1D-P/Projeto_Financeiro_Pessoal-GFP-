@@ -3,17 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\usuarios;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Response;
+use App\Models\Usuarios; // <- Corrigido aqui
 use Illuminate\Support\Facades\Validator;
 
 class UsuariosController extends Controller
 {
-    // Mostrar registros
     public function index()
     {
-        $registros = usuarios::all();
+        $registros = Usuarios::all(); // <- Corrigido
         $contador = $registros->count();
 
         if ($contador > 0) {
@@ -31,16 +28,16 @@ class UsuariosController extends Controller
         }
     }
 
-    // Criar novo usuário
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id_usuario' => 'required',
-            'telefone' => 'required',
-            'nome_usuario' => 'required',
-            'email' => 'required',
-            'descricao' => 'required',
-            'status' => 'required',
+            'id_usuario' => '',
+            'telefone' => '',
+            'nome_usuario' => '',
+            'email' => '',
+            'descricao' => '',
+            'status' => '',
+            'uid' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -51,7 +48,7 @@ class UsuariosController extends Controller
             ], 400);
         }
 
-        $registros = usuarios::create($request->all());
+        $registros = Usuarios::create($request->all()); // <- Corrigido
 
         if ($registros) {
             return response()->json([
@@ -67,10 +64,9 @@ class UsuariosController extends Controller
         }
     }
 
-    // Mostrar usuário por ID
     public function show($id)
     {
-        $registros = usuarios::find($id);
+        $registros = Usuarios::find($id); // <- Corrigido
 
         if ($registros) {
             return response()->json([
@@ -86,7 +82,6 @@ class UsuariosController extends Controller
         }
     }
 
-    // Atualizar usuário
     public function update(Request $request, string $id)
     {
         $validator = Validator::make($request->all(), [
@@ -106,7 +101,7 @@ class UsuariosController extends Controller
             ], 400);
         }
 
-        $registroBanco = usuarios::find($id);
+        $registroBanco = Usuarios::find($id); // <- Corrigido
 
         if (!$registroBanco) {
             return response()->json([
@@ -115,7 +110,6 @@ class UsuariosController extends Controller
             ], 404);
         }
 
-        // Atualiza apenas os campos enviados
         if ($request->has('id_usuario')) $registroBanco->id_usuario = $request->id_usuario;
         if ($request->has('telefone')) $registroBanco->telefone = $request->telefone;
         if ($request->has('nome_usuario')) $registroBanco->nome_usuario = $request->nome_usuario;
@@ -137,10 +131,9 @@ class UsuariosController extends Controller
         }
     }
 
-    // Deletar usuário
     public function destroy($id)
     {
-        $registroBanco = usuarios::find($id);
+        $registroBanco = Usuarios::find($id); // <- Corrigido
 
         if (!$registroBanco) {
             return response()->json([

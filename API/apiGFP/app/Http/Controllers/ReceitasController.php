@@ -43,7 +43,7 @@ class ReceitasController extends Controller
             'id_Tipo_pagamento' => 'required',
             'id_conta' => 'required',
             'status' => 'required',
-            
+            'uid' => 'required'
         ]);
 
         if ($validator->fails()) {

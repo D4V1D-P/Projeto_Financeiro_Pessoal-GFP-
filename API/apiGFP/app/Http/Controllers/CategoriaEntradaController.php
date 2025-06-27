@@ -35,11 +35,11 @@ class CategoriaEntradaController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id_Categoria_entrada' => 'required',
+            'id_Categoria_entrada' => '',
             'id_usuario' => 'required',
             'nome' => 'required',
             'status' => 'required',
-            
+            'uid' => 'required'
         ]);
 
         if ($validator->fails()) {

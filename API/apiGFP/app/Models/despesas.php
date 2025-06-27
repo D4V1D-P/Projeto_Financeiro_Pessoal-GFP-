@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class despesas extends Model
+class Despesas extends Model
 {
+    public $timestamps = false;
     protected $fillable = [
         'id_despesa',
         'id_Categoria_saida',

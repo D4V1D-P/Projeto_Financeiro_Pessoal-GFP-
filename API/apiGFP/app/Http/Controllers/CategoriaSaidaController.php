@@ -39,7 +39,7 @@ class CategoriaSaidaController extends Controller
             'id_usuario' => 'required',
             'nome' => 'required',
             'status' => 'required',
-            
+            'uid' => 'required'
         ]);
 
         if ($validator->fails()) {

@@ -1,4 +1,5 @@
 <?php
+namespace App\Http;
 
 namespace Illuminate\Foundation\Http;
 

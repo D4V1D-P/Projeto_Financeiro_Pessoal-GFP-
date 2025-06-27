@@ -73,6 +73,8 @@ Route::post('/tipo_pagamento', [TipoPagamentoController::class, 'store']);
 Route::put('/tipo_pagamento/{id}', [TipoPagamentoController::class, 'update']);
 Route::delete('/tipo_pagamento/{id}', [TipoPagamentoController::class, 'destroy']);
 
+Route::get('/registrar', [UsuariosController::class, 'index']);
+
 Route::post('/registrar', function (Request $request) {
     $token = $request->bearerToken();
 
