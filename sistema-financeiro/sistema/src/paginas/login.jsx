@@ -5,6 +5,10 @@ import { useHistory } from "react-router-dom";
 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { setDoc, doc } from "firebase/firestore";
+import axios from 'axios'
+
+import Loader from '../components/spiner'
+
 
 function Login({navigation}) {
   const history = useHistory();
@@ -16,21 +20,51 @@ function Login({navigation}) {
   const [telefone, setTelefone] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = async (e) => {
+  const [btnCadastro, setBtnCadastro] = useState('Cadastrar')
+  const [btnLogin, setBtnLogin] = useState('Fazer Login')
+
+const handleLogin = async (e) => {
   e.preventDefault();
+  setBtnLogin(Loader);
+
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    const token = await user.getIdToken();
+
+    // (opcional) Buscar dados do MySQL com o uid
+    const response = await axios.get(`http://localhost:8000/api/usuarios`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const usuario = response.data.data.find(u => u.uid === user.uid);
+
+    // 💾 Salva no localStorage
+    localStorage.setItem("usuario", JSON.stringify({
+      uid: user.uid,
+      email: user.email,
+      nome_usuario: usuario?.nome_usuario || '',
+      id_usuario: usuario?.id_usuario || null
+    }));
+
     history.replace("/Dashboard");
+
   } catch (err) {
     console.error("Erro no login:", err);
     setError("Erro ao fazer o login: " + err.message);
     alert("Erro ao fazer o login: " + err.message);
+  } finally {
+    setBtnLogin('Fazer Login');
   }
 };
 
 
+
 const handleCadastro = async (e) => {
   e.preventDefault();
+  setBtnCadastro(Loader);
 
   if (!nome_usuario || !email || !password || !telefone) {
     setError("Todos os campos são obrigatórios.");
@@ -38,25 +72,46 @@ const handleCadastro = async (e) => {
   }
 
   try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
+    // Salvar no Firestore
     await setDoc(doc(db, "usuarios", user.uid), {
       nome_usuario,
       telefone,
     });
 
+    // Pegar token do Firebase
+    const token = await user.getIdToken();
+
+    // Enviar para backend Laravel
+    const response = await axios.post('http://localhost:8000/api/registrar', {
+      nome_usuario,
+      telefone,
+      email
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    // 💾 Agora sim! Salva os dados no localStorage
+    localStorage.setItem("usuario", JSON.stringify({
+      uid: user.uid,
+      email: email,
+      nome_usuario: nome_usuario,
+      id_usuario: response.data.data?.id_usuario || null // se o backend retornar isso
+    }));
+
     alert("Usuário cadastrado com sucesso!");
     history.replace("/Dashboard");
 
   } catch (err) {
-    console.error("Erro no cadastro:", err); // Mostra o erro no console
+    console.error("Erro no cadastro:", err);
     setError("Erro ao cadastrar: " + err.message);
     alert("Erro ao cadastrar: " + err.message);
+  } finally {
+    setBtnCadastro('Cadastrar');
   }
 };
 
@@ -130,10 +185,10 @@ const handleCadastro = async (e) => {
                 value={password}
               />
             </div>
-            <button className="botao" type="submit">
-              Cadastrar
-              {error ? <p className="text-danger">{error}</p> : null}
+            <button className="botao btn-gfp" type="submit">
+              {btnCadastro}
             </button>
+            {error ? <p className="text-danger">{error}</p> : null}
           </div>
         </form>
       ) : (
@@ -173,10 +228,10 @@ const handleCadastro = async (e) => {
             <a href="#ooo" className="align-self-end text-esqueciminhasenha">
               esqueci minha senha
             </a>
-            <button className="botao" type="submit">
-              Login
-              {error ? <p className="text-danger">{error}</p> : null}
+            <button className="botao btn-gfp" type="submit">
+              {btnLogin}
             </button>
+              {error ? <p className="text-danger">{error}</p> : null}
           </div>
         </form>
       )}

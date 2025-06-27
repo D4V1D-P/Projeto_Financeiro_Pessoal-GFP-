@@ -1,15 +1,27 @@
 import { faPenToSquare, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom/cjs/react-router-dom";
+//import axios from "axios";
+import AddCategoria from "../components/addCategoria";
 
 function Categorias() {
+  
+  const [isAdd, setIsAdd] = useState(false)
+  const modalCategoria = () =>{
+    setIsAdd(true)
+    console.log('clicou mona!')
+  }
+const Fechar =() =>{
+  setIsAdd(false)
+}
   return (
     <div className="campo mx-4">
+      {isAdd && <AddCategoria onClose={Fechar}/>}
       <div className="div3 w-80">
         <div className="row mb-4 w-60">
           <div className="col-sm-6"><h2>Categorias</h2></div>
-          <div className="col-sm-6"><button className="btn btn-primary float-end2">Adicionar Categoria +</button></div>
+          <div className="col-sm-6"><button className="btn btn-primary float-end2" onClick={modalCategoria}>Adicionar Categoria +</button></div>
         </div>
         <h5>Histórico de Categorias</h5>
         <table className="table w-60 shadow1 mt-4">

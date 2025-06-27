@@ -11,9 +11,8 @@ import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
-import axios from 'axios';
 
-const Sidebar = async () => {
+const Sidebar = () => {
     const location = useLocation()
     useEffect(() => {
         const menuItems = document.querySelectorAll('.areaMenu')
@@ -64,19 +63,6 @@ const Sidebar = async () => {
     };
     fetchUserData();
   }, []);
-
-  const token = await auth().currentUser.getIdToken()
-
-    await axios.post('http://localhost:8000/api/registrar', {
-    nome: 'Bianca',
-    email: 'bianca@email.com',
-    telefone: '123456789'
-    }, {
-    headers: {
-        Authorization: `Bearer ${token}`
-    }
-    })
-
 
     return (
         <>
