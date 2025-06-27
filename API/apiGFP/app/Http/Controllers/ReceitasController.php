@@ -35,7 +35,6 @@ class ReceitasController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id_receita' => 'required',
             'id_Categoria_entrada' => 'required',
             'valor' => 'required',
             'data' => 'required',
@@ -93,7 +92,6 @@ class ReceitasController extends Controller
     public function update(Request $request, string $id)
     {
         $validator = Validator::make($request->all(), [
-            'id_receita' => '',
             'id_Categoria_entrada' => '',
             'valor' => '',
             'data' => '',
@@ -121,7 +119,6 @@ class ReceitasController extends Controller
         }
 
         // Atualiza apenas os campos enviados
-        if ($request->has('id_receita')) $registroBanco->id_receita = $request->id_receita;
         if ($request->has('id_Categoria_entrada')) $registroBanco->id_Categoria_entrada = $request->id_Categoria_entrada;
         if ($request->has('valor')) $registroBanco->valor = $request->valor;
         if ($request->has('data')) $registroBanco->data = $request->data;

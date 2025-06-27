@@ -8,7 +8,6 @@ class Receitas extends Model
 {
     public $timestamps = false;
     protected $fillable = [
-        'id_receita',
         'id_Categoria_entrada',
         'valor',
         'data',
