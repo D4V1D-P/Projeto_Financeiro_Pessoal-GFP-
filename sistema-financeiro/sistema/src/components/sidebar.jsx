@@ -11,6 +11,7 @@ import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const Sidebar = () => {
     const location = useLocation()
@@ -39,30 +40,48 @@ const Sidebar = () => {
     }
   };
   
-  const [nome_usuario, setNome_Usuario] = useState('')
-  
+  const [nome, setNome] = useState('Carregando...')
+
   useEffect(() => {
-    const db = getFirestore();
-    const fetchUserData = async () => {
-      const user = auth.currentUser;
+    const auth = getAuth()
+    const db = getFirestore()
+
+    const usuarioSalvo = localStorage.getItem("usuario")
+    if (usuarioSalvo) {
+      const dados = JSON.parse(usuarioSalvo)
+      setNome(dados.nome_usuario || "Usuário sem nome")
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const docRef = doc(db, "usuarios", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          console.log(data);
-          console.log(user);
-          console.log(data.nome_usuario || "");
-          console.log(data.telefone || "");
-          console.log(user.email || "");
-          console.log(user.uid || "");
-          console.log(data.descricao || "");
-          setNome_Usuario(data.nome_usuario || "Usuário");
+        try {
+          const docRef = doc(db, "usuarios", user.uid)
+          const docSnap = await getDoc(docRef)
+          if (docSnap.exists()) {
+            const data = docSnap.data()
+            setNome(data.nome_usuario || "Usuário sem nome")
+
+            localStorage.setItem("usuario", JSON.stringify({
+              uid: user.uid,
+              email: user.email,
+              nome_usuario: data.nome_usuario,
+              id_usuario: user.id_usuario || null
+            }))
+          } else {
+            setNome("Usuário não encontrado")
+          }
+        } catch (error) {
+          console.error("Erro ao buscar dados do Firestore:", error)
+          setNome("Erro ao buscar dados")
         }
+      } else {
+        setNome("Nenhum usuário logado")
+        localStorage.removeItem("usuario")
       }
-    };
-    fetchUserData();
-  }, []);
+    })
+
+    return () => unsubscribe()
+  }, [])
 
     return (
         <>
@@ -168,7 +187,7 @@ const Sidebar = () => {
 
                         </div>
                     </div>
-                    <button className="botao mb-3 btnnav" onClick={Sair}>{nome_usuario}</button>
+                    <button className="botao mb-3 btnnav" onClick={Sair}>{nome}</button>
                 </div>
             </div>
         </>

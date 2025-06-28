@@ -12,7 +12,7 @@ function Categorias() {
     setIsAdd(true)
     console.log('clicou mona!')
   }
-const Fechar =() =>{
+const Fechar = () => {
   setIsAdd(false)
 }
   return (
@@ -29,7 +29,7 @@ const Fechar =() =>{
             <tr>
               <th scope="col">ID</th>
               <th scope="col">Categoria</th>
-              <th scope="col">Preço</th>
+              <th scope="col">Tipo</th>
               <th scope="col">Modificar</th>
               <th scope="col">Deletar</th>
             </tr>

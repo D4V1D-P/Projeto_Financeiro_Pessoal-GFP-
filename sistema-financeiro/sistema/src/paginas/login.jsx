@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "../firebase";
+import { auth } from "../firebase";
 import { useHistory } from "react-router-dom";
 
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { setDoc, doc } from "firebase/firestore";
+import { setDoc, doc, getDoc, getFirestore } from "firebase/firestore";
+
 import axios from 'axios'
 
 import Loader from '../components/spiner'
@@ -24,41 +25,46 @@ function Login({navigation}) {
   const [btnLogin, setBtnLogin] = useState('Fazer Login')
 
 const handleLogin = async (e) => {
-  e.preventDefault();
-  setBtnLogin(Loader);
+  e.preventDefault()
+  setBtnLogin(Loader)
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    const token = await user.getIdToken();
+    const userCredential = await signInWithEmailAndPassword(auth, email, password)
+    const user = userCredential.user
+    
+    const db = getFirestore();
+    // 🔍 Buscar os dados do Firestore pelo UID
+    const docRef = doc(db, "usuarios", user.uid)
+    const docSnap = await getDoc(docRef)
+    console.log("Tentando buscar Firestore com UID:", user.uid)
+    console.log("Dados do Firestore:", docSnap.exists(), docSnap.data())
+    console.log(user)
 
-    // (opcional) Buscar dados do MySQL com o uid
-    const response = await axios.get(`http://localhost:8000/api/usuarios`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    if (docSnap.exists()) {
+      const dados = docSnap.data()
 
-    const usuario = response.data.data.find(u => u.uid === user.uid);
+      // 💾 Armazenar todos os dados no localStorage
+      localStorage.setItem("usuario", JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        nome_usuario: dados.nome_usuario,
+        telefone: dados.telefone,
+        id_usuario: user.id_usuario || null
+      }))
 
-    // 💾 Salva no localStorage
-    localStorage.setItem("usuario", JSON.stringify({
-      uid: user.uid,
-      email: user.email,
-      nome_usuario: usuario?.nome_usuario || '',
-      id_usuario: usuario?.id_usuario || null
-    }));
+    } else {
+      alert("Usuário logado, mas não encontrado no Firestore.")
+    }
 
-    history.replace("/Dashboard");
-
+    history.replace("/Dashboard")
   } catch (err) {
-    console.error("Erro no login:", err);
-    setError("Erro ao fazer o login: " + err.message);
-    alert("Erro ao fazer o login: " + err.message);
-  } finally {
-    setBtnLogin('Fazer Login');
+    console.error("Erro no login:", err)
+    setError("Erro ao fazer o login: " + err.message)
+    alert("Erro ao fazer o login: " + err.message)
   }
-};
+
+  setBtnLogin("Fazer Login")
+}
 
 
 
@@ -74,7 +80,8 @@ const handleCadastro = async (e) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-
+    
+    const db = getFirestore();
     // Salvar no Firestore
     await setDoc(doc(db, "usuarios", user.uid), {
       nome_usuario,
