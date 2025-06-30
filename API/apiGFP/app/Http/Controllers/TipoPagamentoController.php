@@ -35,7 +35,7 @@ class TipoPagamentoController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id_Tipo_pagamento' => 'required',
+            'id_Tipo_pagamento' => '',
             'id_usuario' => 'required',
             'nome' => 'required',
             'uid' => 'required'

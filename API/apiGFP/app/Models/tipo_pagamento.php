@@ -11,5 +11,6 @@ class Tipo_pagamento extends Model
         'id_Tipo_pagamento',
         'id_usuario',
         'nome',
+        'uid'
     ];
 }

@@ -35,6 +35,8 @@ class ReceitasController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'id' => '',
+            'id_usuario' => 'required',
             'id_Categoria_entrada' => 'required',
             'valor' => 'required',
             'data' => 'required',

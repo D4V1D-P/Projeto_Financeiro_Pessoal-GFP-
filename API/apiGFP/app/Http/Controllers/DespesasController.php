@@ -35,14 +35,15 @@ class DespesasController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id_despesa' => 'required',
-            'id_Categoria_entrada' => 'required',
+            'id' => '',
+            'id_usuario' => 'required',
+            'id_Categoria_saida' => 'required',
             'valor' => 'required',
             'data' => 'required',
-            'descricao' => 'required',
+            'descricao' => '',
             'id_Tipo_pagamento' => 'required',
+            'status' => '',
             'id_conta' => 'required',
-            'status' => 'required',
             'uid' => 'required'
         ]);
 

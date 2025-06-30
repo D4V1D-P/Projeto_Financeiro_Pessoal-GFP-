@@ -13,6 +13,7 @@ class Conta extends Model
         'banco_nome',
         'descricao_banco',
         'saldo',
-        'status'
+        'status',
+        'uid'
     ];
 }

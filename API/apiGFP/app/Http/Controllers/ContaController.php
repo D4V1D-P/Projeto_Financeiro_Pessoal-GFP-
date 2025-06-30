@@ -35,7 +35,7 @@ class ContaController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id_Conta' => 'required',
+            'id_Conta' => '',
             'id_usuario' => 'required',
             'banco_nome' => 'required',
             'descricao_banco' => 'required',

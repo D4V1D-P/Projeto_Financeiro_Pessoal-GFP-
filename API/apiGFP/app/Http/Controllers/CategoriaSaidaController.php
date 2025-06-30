@@ -35,7 +35,7 @@ class CategoriaSaidaController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id_CategoriaSaida' => 'required',
+            'id_CategoriaSaida' => '',
             'id_usuario' => 'required',
             'nome' => 'required',
             'status' => '',

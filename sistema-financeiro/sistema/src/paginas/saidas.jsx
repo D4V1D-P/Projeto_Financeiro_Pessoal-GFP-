@@ -1,101 +1,227 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Tablesaidas from "../components/tablesaidas";
+//import Tableentradas from "../components/tableentradas";
+import { getUsuarioLogado } from "../utils/user";
 
 const Saidas = () => {
+  const [categoria, setCategoria] = useState("");
+  const [valor, setValor] = useState("");
+  const [data, setData] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [conta, setConta] = useState("");
+  const [pag, setPag] = useState("");
 
-    const [categoria, setCategoria] = useState('')
-    const [preco, setPreco] = useState('')
-    const [tipoPagamento, setTipopagamento] = useState('')
-    const [data, setData] = useState('')
-    const [descricao, setDescricao] = useState('')
+  const [usuario, setUsuario] = useState(null);
+  const [categorias, setCategorias] = useState([]);
+  const [contas, setContas] = useState([]);
+  const [pagamentos, setPagamentos] = useState([]);
 
-    const Handlesubmit = (evento) => {
-        evento.preventDefault()
-        const novaSaida = { categoria, preco, tipoPagamento, data, descricao }
-        axios.post('http://localhost:3005/saidas', novaSaida)
-            .then(() => {
-                alert('saída adicionada com sucesso!')
-                setCategoria('')
-                setPreco('')
-                setTipopagamento('')
-                setData('')
-                setDescricao('')
-            })
-            .catch((erro) => {
-                alert('erro ao registrar saída', erro)
-            })
-    }
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = await getUsuarioLogado();
+      if (user) {
+        setUsuario(user);
+      } else {
+        alert("Usuário não encontrado ou não logado");
+      }
+    };
 
-    return (
-        <>
-            <div className="campo2 mt-5 mx-5">
-            <h2 className="mt-4 m-225">Saidas</h2>
-                <form onSubmit={Handlesubmit}>
-                    <div className="formcadastro">
-                        <h5>Adicionar nova despesa</h5>
-                        <div className="row mb-3 mt-4">
-                            <div className="col-md-6 r campoLabel">
-                                <label htmlFor="categoria" className="label">categoria</label>
-                                <select name="categoria" id="categoria" required value={categoria} onChange={(e) => setCategoria(e.target.value)}>
-                                    <option value="">Selecione</option>
-                                    <option value="salario">Salário</option>
-                                    <option value="freelance">Freelance ou prestação de serviços</option>
-                                    <option value="investimentos">Rendimentos de investimentos</option>
-                                    <option value="aluguéis">Aluguéis</option>
-                                    <option value="pensao_aposentadoria">Pensão ou aposentadoria</option>
-                                    <option value="comissoes_bonificacoes">Comissões ou bonificações</option>
-                                    <option value="lucros_negocios">Lucros de negócios próprios</option>
-                                    <option value="premios_sorteios">Prêmios ou sorteios</option>
-                                    <option value="venda_bens">Venda de bens</option>
-                                    <option value="ajuda_familiar">Ajuda financeira de familiares ou amigos</option>
-                                    <option value="dividendos">Dividendos de ações</option>
-                                    <option value="reembolsos">Reembolsos</option>
-                                </select>
-                            </div>
-                            <div className="col-md-6 campoLabel">
-                                <label htmlFor="data" className="label">data</label>
-                                <input required type="date" id="data" className="input" value={data} onChange={(e) => setData(e.target.value)} />
-                            </div>
-                        </div>
-                        <div className="row mb-3 gap-3">
-                            <div className="col-md-12 r campoLabel">
-                                <label htmlFor="tipo_pagamento" className="label">Tipo Pagamento</label>
-                                <select name="tipo_pagamento" id="tipo_pagamento">
-                                    <option value="selecione">selecione</option>
-                                    <option value="pix">pix</option>
-                                    <option value="debito">debito</option>
-                                </select>
-                            </div>
-                            <div className="col-md-12 campoLabel">
-                                <label htmlFor="valor" className="label">Valor</label>
-                                <input type="number" className="input" id="valor" name="valor" value={preco} onChange={(e) => setPreco(e.target.value)} />
-                            </div>
-                        </div>
-                        <div className="row mb-3 gap-3">
-                            <div className="col-md-12 r campoLabel">
-                                <label htmlFor="conta" className="label">Conta</label>
-                                <select name="conta" id="conta">
-                                    <option value="nubank">nubank</option>
-                                    <option value="itau">itau</option>
-                                </select>
-                            </div>
-                            <div className="col-md-12 campoLabel">
-                                <label htmlFor="descricao" className="label">descrição</label>
-                                <textarea id="descricao" name="descricao" style={{ width: '100%', height: '100px' }} value={descricao} onChange={(e) => setDescricao(e.target.value)}></textarea>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <button className="botao fw-medium" type="submit">Cadastrar</button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (!usuario) return;
+    const fetchCategoria = async () => {
+      const response = await axios.get(
+        "http://localhost:8000/api/CategoriaSaida"
+      );
+      const categoriasUsuario = response.data.data.filter(
+        (i) => usuario.uid === i.uid
+      );
+      console.log(categoriasUsuario);
+      setCategorias(categoriasUsuario);
+    };
+    fetchCategoria();
+  }, [usuario]);
+
+  useEffect(() => {
+    if (!usuario) return;
+    const fetchConta = async () => {
+      const response = await axios.get("http://localhost:8000/api/Conta");
+      const contasUsuario = response.data.data.filter(
+        (i) => usuario.uid === i.uid
+      );
+      setContas(contasUsuario);
+    };
+    fetchConta();
+  }, [usuario]);
+
+  useEffect(() => {
+    if (!usuario) return;
+    const fetchTipoPag = async () => {
+      const response = await axios.get(
+        "http://localhost:8000/api/tipo_pagamento"
+      );
+      const pagamentosUsuario = response.data.data.filter(
+        (i) => usuario.uid === i.uid
+      );
+      setPagamentos(pagamentosUsuario);
+    };
+    fetchTipoPag();
+  }, [usuario]);
+
+  const Enviardados = (e) => {
+    e.preventDefault();
+    const novaSaida = {
+      id_usuario: usuario.id_usuario,
+      id_Categoria_saida: categoria,
+      valor,
+      data,
+      descricao,
+      id_Tipo_pagamento: pag,
+      id_conta: conta,
+      status: "ativo",
+      uid: usuario.uid,
+    };
+    console.log(novaSaida);
+    axios
+      .post("http://localhost:8000/api/despesas", novaSaida)
+      .then(() => {
+        alert("despesa adicionada!");
+      })
+      .catch((erro) => {
+        alert("erro ao cadastrar despesa" + erro);
+      });
+  };
+
+  return (
+    <>
+      <div className="campo2 mt-5 mx-5">
+        <h2 className="mt-4 m-225">Saidas</h2>
+        <form onSubmit={Enviardados}>
+          <div className="formcadastro">
+            <h5>Adicionar nova despesa</h5>
+            <div className="row mb-3 mt-4">
+              <div className="col-md-6 r campoLabel">
+                <label htmlFor="id_Categoria_saida" className="label">
+                  categoria
+                </label>
+                <select
+                  name="id_Categoria_saida"
+                  id="id_Categoria_saida"
+                  required
+                  value={categoria}
+                  onChange={(e) => setCategoria(e.target.value)}
+                >
+                  {categorias.length !== 0 ? (
+                    categorias.map((e) => (
+                      <option key={e.id_Categoria_saida} value={e.id_Categoria_saida} >
+                        {e.nome}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="">carregando...</option>
+                  )}
+                </select>
+              </div>
+              <div className="col-md-6 campoLabel">
+                <label htmlFor="data" className="label">
+                  data
+                </label>
+                <input
+                  required
+                  type="date"
+                  id="data"
+                  className="input"
+                  value={data}
+                  onChange={(e) => setData(e.target.value)}
+                />
+              </div>
             </div>
-            <Tablesaidas/>
-        </>
-    )
-}
+            <div className="row mb-3 gap-3">
+              <div className="col-md-12 r campoLabel">
+                <label htmlFor="id_Categoria_saida" className="label">
+                  Tipo Pagamento
+                </label>
+                <select
+                  name="id_Categoria_saida"
+                  id="id_Categoria_saida"
+                  value={pag}
+                  onChange={(e) => setPag(e.target.value)}
+                >
+                  {pagamentos.length !== 0 ? (
+                    pagamentos.map((e) => (
+                      <option key={e.id_Tipo_pagamento} value={e.id_Tipo_pagamento}>
+                        {e.nome}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="">carregando...</option>
+                  )}
+                </select>
+              </div>
+              <div className="col-md-12 campoLabel">
+                <label htmlFor="valor" className="label">
+                  Valor
+                </label>
+                <input
+                  type="number"
+                  className="input"
+                  id="valor"
+                  name="valor"
+                  value={valor}
+                  onChange={(e) => setValor(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="row mb-3 gap-3">
+              <div className="col-md-12 r campoLabel">
+                <label htmlFor="id_conta" className="label">
+                  Conta
+                </label>
+                <select
+                  name="id_conta"
+                  id="id_conta"
+                  value={conta}
+                  onChange={(e) => setConta(e.target.value)}
+                >
+                  {contas.length !== 0 ? (
+                    contas.map((e) => (
+                      <option key={e.id_conta} value={e.id_conta}>
+                        {e.banco_nome}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="">carregando...</option>
+                  )}
+                </select>
+              </div>
+              <div className="col-md-12 campoLabel">
+                <label htmlFor="descricao" className="label">
+                  descrição
+                </label>
+                <textarea
+                  id="descricao"
+                  name="descricao"
+                  style={{ width: "100%", height: "100px" }}
+                  value={descricao}
+                  onChange={(e) => setDescricao(e.target.value)}
+                ></textarea>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-md-12">
+                <button className="botao fw-medium" type="submit">
+                  Cadastrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      {/* <Tablesaidas/> */}
+    </>
+  );
+};
 
-export default Saidas
+export default Saidas;

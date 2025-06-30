@@ -1,15 +1,59 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { faPenToSquare, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom/cjs/react-router-dom";
+import AddTipoPag from "../components/addTipoPag";
+import axios from "axios";
+//import Tableentradas from "../components/tableentradas";
+import { getUsuarioLogado } from "../utils/user";
+import Loader from '../components/spiner2'
 
 function TPPagamento() {
-  const Adicionar = () => {
+  const [isAdd, setIsAdd] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
+  const Adicionar = () => {
+    setIsAdd(true)
   }
+
+  const Fechar = () => {
+    setIsAdd(false)
+  }
+
+  const [usuario, setUsuario] = useState(null);
+  useEffect(() => {
+      const fetchUser = async () => {
+        const user = await getUsuarioLogado();
+        if (user) {
+          setUsuario(user);
+        } else {
+          alert("Usuário não encontrado ou não logado");
+        }
+      };
+  
+      fetchUser();
+    }, []);
+
+    const [pagamentos, setPagamentos] = useState([]);
+
+    useEffect(() => {
+      if (!usuario) return;
+      const fetchTipoPag = async () => {
+        const response = await axios.get(
+          "http://localhost:8000/api/tipo_pagamento"
+        );
+        const pagamentosUsuario = response.data.data.filter(
+          (i) => usuario.uid === i.uid
+        );
+        setIsLoading(false)
+        setPagamentos(pagamentosUsuario);
+      };
+      fetchTipoPag();
+    }, [usuario]);
 
   return (
     <div className="campo mx-4">
+      {isAdd && <AddTipoPag onClose={Fechar}/>}
       <div className="div3 w-80">
         <div className="row mb-4 w-60">
           <div className="col-sm-6">
@@ -29,47 +73,30 @@ function TPPagamento() {
               <th scope="col">Deletar</th>
             </tr>
           </thead>
+          {isLoading && <Loader />}
           <tbody>
-            <tr>
-              <th scope="row" className="v-a"> 1 </th>
-              <td className="v-a fw-bolder">Débito</td>
-              <td className="v-a">
-                <Link to={`/`} className="mb-2 mt-2 align-middle">
-                  <FontAwesomeIcon
-                    icon={faPenToSquare}
-                    style={{ color: "#204A77", height: "18px" }}
-                  />
-                </Link>
-              </td>
-              <td className="v-a">
-                <button className="btn mb-2 mt-2 align-middle">
-                  <FontAwesomeIcon
-                    icon={faTrashCan}
-                    style={{ color: "#E9332E", height: "18px" }}
-                  />
-                </button>
-              </td>
-            </tr>
-            <tr>
-              <th scope="row" className="v-a"> 2 </th>
-              <td className="v-a fw-bolder">Dinheiro</td>
-              <td className="v-a">
-                <Link to={`/`} className="mb-2 mt-2 align-middle">
-                  <FontAwesomeIcon
-                    icon={faPenToSquare}
-                    style={{ color: "#204A77", height: "18px" }}
-                  />
-                </Link>
-              </td>
-              <td className="v-a">
-                <button className="btn mb-2 mt-2 align-middle">
-                  <FontAwesomeIcon
-                    icon={faTrashCan}
-                    style={{ color: "#E9332E", height: "18px" }}
-                  />
-                </button>
-              </td>
-            </tr>
+            {pagamentos.map((e, i)=>(
+              <tr key={i}>
+                <th scope="row" className="v-a"> {i} </th>
+                <td className="v-a fw-bolder">{e.nome}</td>
+                <td className="v-a">
+                  <Link to={`/`} className="mb-2 mt-2 align-middle">
+                    <FontAwesomeIcon
+                      icon={faPenToSquare}
+                      style={{ color: "#204A77", height: "18px" }}
+                    />
+                  </Link>
+                </td>
+                <td className="v-a">
+                  <button className="btn mb-2 mt-2 align-middle">
+                    <FontAwesomeIcon
+                      icon={faTrashCan}
+                      style={{ color: "#E9332E", height: "18px" }}
+                    />
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

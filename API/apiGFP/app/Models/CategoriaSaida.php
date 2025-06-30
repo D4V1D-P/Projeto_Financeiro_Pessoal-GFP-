@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class CategoriaSaida extends Model
 {
     public $timestamps = false;
+    protected $primaryKey = 'id_Categoria_saida';
     protected $fillable = [
-        'id_CategoriaSaida',
+        'id_Categoria_saida',
         'id_usuario',
         'nome',
-        'status'
+        'status',
+        'uid'
     ];
 }

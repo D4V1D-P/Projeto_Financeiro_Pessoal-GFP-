@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoriaEntradaController;
 use App\Http\Controllers\CategoriaSaidaController;
 use App\Http\Controllers\ContaController;
 use App\Http\Controllers\TipoPagamentoController;
+use App\Http\Controllers\DashboardController;
 use App\Models\Usuarios;
 use Kreait\Firebase\Auth;
 use Kreait\Firebase\Factory;
@@ -111,3 +112,12 @@ Route::post('/registrar', function (Request $request) {
 
     return response()->json(['sucesso' => true, 'usuario' => $usuario]);
 });
+
+
+Route::get('/topgastos', [DashboardController::class, 'topGastos']);
+Route::get('/topgastosporcategoria', [DashboardController::class, 'topGastosPorCategoria']);
+Route::get('/gastosportipopagamento', [DashboardController::class, 'gastosPorTipoPagamento']);
+Route::get('/gastosaolongodotempo', [DashboardController::class, 'gastosAoLongoDoTempo']);
+Route::get('/saldototal', [DashboardController::class, 'saldoTotal']);
+Route::get('/saidastotais', [DashboardController::class, 'saidasTotais']);
+Route::get('/gastosedespesas', [DashboardController::class, 'gastosEDespesas']);

@@ -3,11 +3,13 @@ import { useHistory } from "react-router-dom";
 import axios from "axios";
 import { getUsuarioLogado } from "../utils/user";
 
-const AddCategoria = (props) => {
+const AddConta = (props) => {
   const history = useHistory();
-  const [nome, setNome] = useState("");
-  const [categoria, setCategoria] = useState("");
-  const [usuario, setUsuario] = useState(null);
+
+  const [usuario, setUsuario] = useState(null)
+  const [banco_nome, setBanco_nome] = useState("");
+  const [descricao_banco, setDescricao_banco] = useState("");
+  const [saldo, setSaldo] = useState("");
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -30,37 +32,24 @@ const AddCategoria = (props) => {
       return;
     }
 
-    const novaCategoria = {
-      id_usuario: usuario.id_usuario, // agora temos o id
-      nome,
-      uid: usuario.uid,
+    const novaConta = {
+      id_usuario: usuario.id_usuario,
+      banco_nome,
+      descricao_banco,
+      saldo,
       status: "ativo",
+      uid: usuario.uid,
     };
-    console.log(novaCategoria);
+    console.log(novaConta);
 
-    if (categoria === "Receita") {
-      axios
-        .post("http://localhost:8000/api/categoria_entrada", novaCategoria)
-        .then(() => {
-          alert("Categoria cadastrada com sucesso!");
-          history.push("/Categorias");
-        })
-        .catch((err) => {
-          alert("Erro ao cadastrar categoria: " + err);
-        });
-    } else if (categoria === "Despesa") {
-      axios
-        .post("http://localhost:8000/api/CategoriaSaida", novaCategoria)
-        .then(() => {
-          alert("Categoria cadastrada com sucesso!");
-          history.push("/Categorias");
-        })
-        .catch((err) => {
-          alert("Erro ao cadastrar categoria: " + err);
-        });
-    } else {
-      alert("selecione um tipo de categoria");
-    }
+    axios.post("http://localhost:8000/api/Conta", novaConta)
+      .then(() => {
+        alert("Conta cadastrada com sucesso!");
+        history.push("/Contas");
+      })
+      .catch((err) => {
+        alert("Erro ao cadastrar categoria: " + err);
+      });
   };
 
   return (
@@ -73,31 +62,40 @@ const AddCategoria = (props) => {
           <div className="row mb-4">
             <div className="col-md-12 campoLabel">
               <label htmlFor="nome" className="label">
-                Categoria
+                Nome Conta
               </label>
               <input
                 type="text"
-                name="nome"
-                onChange={(e) => setNome(e.target.value)}
+                name="banco_nome"
+                onChange={(e) => setBanco_nome(e.target.value)}
+                required
               />
             </div>
           </div>
           <div className="row mb-4">
             <div className="col-md-12 campoLabel">
               <label htmlFor="nome" className="label">
-                Tipo
+                Descrição
               </label>
-              <select
-                name=""
-                id=""
-                value={categoria}
-                onChange={(e) => setCategoria(e.target.value)}
+              <input
+                type="text"
+                name="descricao_banco"
+                onChange={(e) => setDescricao_banco(e.target.value)}
                 required
-              >
-                <option value=""></option>
-                <option value="Despesa">Despesa</option>
-                <option value="Receita">Receita</option>
-              </select>
+              />
+            </div>
+          </div>
+          <div className="row mb-4">
+            <div className="col-md-12 campoLabel">
+              <label htmlFor="nome" className="label">
+                Saldo
+              </label>
+              <input
+                type="number"
+                name="saldo"
+                onChange={(e) => setSaldo(e.target.value)}
+                required
+              />
             </div>
           </div>
           <div className="row">
@@ -122,4 +120,4 @@ const AddCategoria = (props) => {
   );
 };
 
-export default AddCategoria;
+export default AddConta;

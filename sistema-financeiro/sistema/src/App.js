@@ -14,7 +14,9 @@ import Login from "./paginas/login.jsx";
 import Categorias from "./paginas/categorias.jsx";
 import Contas from "./paginas/contas.jsx";
 import TPPagamento from "./paginas/tpPagamento.jsx";
-import UpdateCategoria from "./components/addCategoria.jsx";
+import addCategoria from "./components/addCategoria.jsx";
+import AddConta from "./components/addConta.jsx";
+import AddTipoPag from "./components/addTipoPag.jsx";
 
 function LoginPage() {
   return (
@@ -35,7 +37,9 @@ function LayoutWithSidebar() {
         <Route path='/Tablesaidas' component={Tablesaidas} />
         <Route path='/update/:id' component={Update} />
         <Route path='/updateentrada/:id' component={Updateentrada} />
-        <Route path='/updatecategoria/:id' component={UpdateCategoria} />
+        <Route path='/addCategoria' component={addCategoria} />
+        <Route path='/addConta' component={AddConta} />
+        <Route path='/addTipoPag' component={AddTipoPag} />
         <Route path='/Categorias' component={Categorias}/>
         <Route path='/Contas' component={Contas}/>
         <Route path='/TPPagamento' component={TPPagamento}/>

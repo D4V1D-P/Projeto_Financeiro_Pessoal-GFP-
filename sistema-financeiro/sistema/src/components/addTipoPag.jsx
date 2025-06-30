@@ -3,10 +3,9 @@ import { useHistory } from "react-router-dom";
 import axios from "axios";
 import { getUsuarioLogado } from "../utils/user";
 
-const AddCategoria = (props) => {
+const AddTipoPag = (props) => {
   const history = useHistory();
   const [nome, setNome] = useState("");
-  const [categoria, setCategoria] = useState("");
   const [usuario, setUsuario] = useState(null);
 
   useEffect(() => {
@@ -30,37 +29,22 @@ const AddCategoria = (props) => {
       return;
     }
 
-    const novaCategoria = {
+    const novoTipoPag = {
       id_usuario: usuario.id_usuario, // agora temos o id
       nome,
       uid: usuario.uid,
-      status: "ativo",
     };
-    console.log(novaCategoria);
+    console.log(novoTipoPag);
 
-    if (categoria === "Receita") {
-      axios
-        .post("http://localhost:8000/api/categoria_entrada", novaCategoria)
-        .then(() => {
-          alert("Categoria cadastrada com sucesso!");
-          history.push("/Categorias");
-        })
-        .catch((err) => {
-          alert("Erro ao cadastrar categoria: " + err);
-        });
-    } else if (categoria === "Despesa") {
-      axios
-        .post("http://localhost:8000/api/CategoriaSaida", novaCategoria)
-        .then(() => {
-          alert("Categoria cadastrada com sucesso!");
-          history.push("/Categorias");
-        })
-        .catch((err) => {
-          alert("Erro ao cadastrar categoria: " + err);
-        });
-    } else {
-      alert("selecione um tipo de categoria");
-    }
+    axios
+      .post("http://localhost:8000/api/tipo_pagamento", novoTipoPag)
+      .then(() => {
+        alert("Categoria cadastrada com sucesso!");
+        history.push("/Categorias");
+      })
+      .catch((err) => {
+        alert("Erro ao cadastrar categoria: " + err);
+      });
   };
 
   return (
@@ -68,36 +52,19 @@ const AddCategoria = (props) => {
       <form onSubmit={handleSubmit}>
         <div className="areaUpdate p-5">
           <div className="mb-4">
-            <h2>Adicionar categoria</h2>
+            <h2>Adicionar Tipo de Pagamento</h2>
           </div>
           <div className="row mb-4">
             <div className="col-md-12 campoLabel">
               <label htmlFor="nome" className="label">
-                Categoria
+                Nome Conta
               </label>
               <input
                 type="text"
                 name="nome"
                 onChange={(e) => setNome(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="row mb-4">
-            <div className="col-md-12 campoLabel">
-              <label htmlFor="nome" className="label">
-                Tipo
-              </label>
-              <select
-                name=""
-                id=""
-                value={categoria}
-                onChange={(e) => setCategoria(e.target.value)}
                 required
-              >
-                <option value=""></option>
-                <option value="Despesa">Despesa</option>
-                <option value="Receita">Receita</option>
-              </select>
+              />
             </div>
           </div>
           <div className="row">
@@ -122,4 +89,4 @@ const AddCategoria = (props) => {
   );
 };
 
-export default AddCategoria;
+export default AddTipoPag;
