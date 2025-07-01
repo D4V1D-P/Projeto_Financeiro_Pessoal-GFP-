@@ -7,6 +7,7 @@ use App\Models\tipo_pagamento;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class TipoPagamentoController extends Controller
 {
@@ -154,4 +155,17 @@ class TipoPagamentoController extends Controller
             'mensagem' => 'Erro ao deletar as informações sobre o Tipo de pagamento'
         ], 500);
     }
+
+    public function tipoPagamentoUsuario(Request $request)
+{
+    $uid = $request->uid;
+    $id_usuario = $request->id_usuario;
+
+    return DB::table('tipo_pagamentos')
+        ->where('uid', $uid)
+        ->where('id_usuario', $id_usuario)
+        ->select('id_Tipo_pagamento', 'nome', 'uid', 'id_usuario')
+        ->get();
+}
+
 }

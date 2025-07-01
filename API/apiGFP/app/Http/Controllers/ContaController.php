@@ -7,6 +7,7 @@ use App\Models\Conta;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class ContaController extends Controller
 {
@@ -162,5 +163,14 @@ class ContaController extends Controller
             'sucesso' => false,
             'mensagem' => 'Erro ao deletar as informações sobre a Conta'
         ], 500);
+    }
+
+    public function contasUsuario(Request $request)
+    {
+        return DB::table('contas')
+        ->select('id_conta', 'banco_nome', 'descricao_banco', 'saldo', 'uid', 'id_usuario')
+            ->where('uid', $request->uid)
+            ->where('id_usuario', $request->id_usuario)
+            ->get();
     }
 }

@@ -121,3 +121,13 @@ Route::get('/gastosaolongodotempo', [DashboardController::class, 'gastosAoLongoD
 Route::get('/saldototal', [DashboardController::class, 'saldoTotal']);
 Route::get('/saidastotais', [DashboardController::class, 'saidasTotais']);
 Route::get('/gastosedespesas', [DashboardController::class, 'gastosEDespesas']);
+
+Route::get('/categorias-entrada-usuario', [CategoriaEntradaController::class, 'categoriasEntradaUsuario']);
+Route::get('/categorias-saida-usuario', [CategoriaSaidaController::class, 'categoriasSaidaUsuario']);
+
+Route::get('/contas-usuario', [ContaController::class, 'contasUsuario']);
+
+Route::get('/tipo-pagamento-usuario', [TipoPagamentoController::class, 'tipoPagamentoUsuario']);
+
+
+

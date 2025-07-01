@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { auth } from "../firebase"
 import { getUsuarioLogado } from "../utils/user";
 import axios from "axios";
 import Pesquisa from "../components/pesquisa";
@@ -37,7 +38,10 @@ ChartJS.register(
   LineElement
 );
 
+
 const Dashboard = () => {
+  const currentUser = auth.currentUser
+
   const [topGastos, setTopgastos] = useState([]);
   const [topCategorias, setTopcategorias] = useState([]);
   const [tipoPag, setTipopag] = useState([]);
@@ -49,38 +53,37 @@ const Dashboard = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const [uid, setUid] = useState('')
+  const [uid, setUid] = useState("");
 
   useEffect(() => {
-      const fetchUser = async () => {
-        const user = await getUsuarioLogado();
-        if (user) {
-          setUid(user.uid)
-          //fetchInitialData(user.uid)
+    const fetchUser = async () => {
+      const user = await getUsuarioLogado();
+      if (user) {
+        setUid(currentUser.uid);
+        //fetchInitialData(user.uid)
 
-           const end = new Date()
-      const start = subDays(end, 30)
+        const end = new Date();
+        const start = subDays(end, 30);
 
-      const formattedStart = format(start, 'yyyy-MM-dd')
-      const formattedEnd = format(end, 'yyyy-MM-dd')
+        const formattedStart = format(start, "yyyy-MM-dd");
+        const formattedEnd = format(end, "yyyy-MM-dd");
 
-      setStartDate(formattedStart)
-      setEndDate(formattedEnd)
+        setStartDate(formattedStart);
+        setEndDate(formattedEnd);
 
-      fetchData(uid, formattedStart, formattedEnd)
-        } else {
-          alert("Usuário não encontrado ou não logado");
-        }
-      };
-  
-      fetchUser();
-    }, []);
+        fetchData(uid, formattedStart, formattedEnd);
+      } else {
+        alert("Usuário não encontrado ou não logado");
+      }
+    };
 
+    fetchUser();
+  }, []);
 
   const fetchData = async () => {
     try {
       const params = { startDate, endDate, uid };
-      console.log(params)
+      console.log(params);
       const [
         gastosResponse,
         categoriasResponse,
@@ -91,8 +94,12 @@ const Dashboard = () => {
         entradasResponse,
       ] = await Promise.all([
         axios.get("http://localhost:8000/api/topgastos", { params }),
-        axios.get("http://localhost:8000/api/topgastosporcategoria", { params }),
-        axios.get("http://localhost:8000/api/gastosportipopagamento", { params }),
+        axios.get("http://localhost:8000/api/topgastosporcategoria", {
+          params,
+        }),
+        axios.get("http://localhost:8000/api/gastosportipopagamento", {
+          params,
+        }),
         axios.get("http://localhost:8000/api/gastosaolongodotempo", { params }),
         axios.get("http://localhost:8000/api/saldototal", { params }),
         axios.get("http://localhost:8000/api/saidastotais", { params }),
@@ -109,12 +116,10 @@ const Dashboard = () => {
 
       console.log(entradasResponse.data);
     } catch (error) {
-      alert("Erro ao buscar dados filtrados"+error);
+      alert("Erro ao buscar dados filtrados" + error);
       console.error(error);
     }
   };
-
-
 
   const topProdutosGastos = {
     labels: topGastos.map((item) => item.id_Categoria_saida),
@@ -283,11 +288,12 @@ const Dashboard = () => {
                 }}
               />
               <div>
-                <h6 style={{ color: "#003366", margin: 0 }}>Total de Receitas</h6>
+                <h6 style={{ color: "#003366", margin: 0 }}>
+                  Total de Receitas
+                </h6>
                 {saldototal.length > 0 && saidastotais.length > 0 ? (
                   <p style={{ fontSize: "15pt", margin: 0 }}>
-                    $
-                    {saldototal[0].total}
+                    ${saldototal[0].total}
                   </p>
                 ) : (
                   <p style={{ margin: 0 }}>Não há dados suficientes.</p>
@@ -310,11 +316,12 @@ const Dashboard = () => {
                 }}
               />
               <div>
-                <h6 style={{ color: "#003366", margin: 0 }}>Total de Despesas</h6>
+                <h6 style={{ color: "#003366", margin: 0 }}>
+                  Total de Despesas
+                </h6>
                 {saldototal.length > 0 && saidastotais.length > 0 ? (
                   <p style={{ fontSize: "15pt", margin: 0 }}>
-                    $
-                    {saidastotais[0].total}
+                    ${saidastotais[0].total}
                   </p>
                 ) : (
                   <p style={{ margin: 0 }}>Não há dados suficientes.</p>

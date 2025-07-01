@@ -1,17 +1,21 @@
+import React, { useEffect, useState } from "react";
+import { auth } from "../firebase"
+import axios from "axios";
+import { Link } from "react-router-dom/cjs/react-router-dom";
 import { faPenToSquare, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom/cjs/react-router-dom";
 import AddCategoria from "../components/addCategoria";
 import { getUsuarioLogado } from "../utils/user";
-import axios from "axios";
 import Loader from '../components/spiner2'
 
+
 function Categorias() {
+  
   const [isAdd, setIsAdd] = useState(false)
-  const [usuario, setUsuario] = useState(null)
   const [categorias, setCategorias] = useState([]) // categorias combinadas
   const [isLoading, setIsLoading] = useState(true)
+  const [uid, setUid] = useState("");
+  const [id_usuario, setIdUsuario] = useState("");
 
   const modalCategoria = () => {
     setIsAdd(true)
@@ -22,46 +26,55 @@ function Categorias() {
   }
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const user = await getUsuarioLogado()
-      if (user) {
-        setUsuario(user)
-      } else {
-        alert("Usuário não encontrado ou não logado")
-      }
+  const fetchUser = async () => {
+    const user = await getUsuarioLogado();
+    const currentUser = auth.currentUser;
+    if (user) {
+      setIdUsuario(user.id_usuario);
+      setUid(user.uid);
+    } else if (currentUser) {
+      setUid(currentUser.uid);
     }
+  }
 
-    fetchUser()
-  }, [])
+  fetchUser();
+}, []);
 
+  
   useEffect(() => {
-    if (!usuario) return
+  if (!uid || !id_usuario) return; // aguarda carregar
 
-    const fetchCategorias = async () => {
-      try {
-        const [resEntrada, resSaida] = await Promise.all([
-          axios.get("http://localhost:8000/api/categoria_entrada"),
-          axios.get("http://localhost:8000/api/CategoriaSaida")
-        ])
+  const fetchCategorias = async () => {
+    try {
+      const params = { uid, id_usuario };
+      
+      const [resEntrada, resSaida] = await Promise.all([
+        axios.get("http://localhost:8000/api/categorias-entrada-usuario", { params }),
+        axios.get("http://localhost:8000/api/categorias-saida-usuario", { params })
+      ]);
 
-        const catEntrada = resEntrada.data.data.filter(cat => cat.uid === usuario.uid)
-          .map(cat => ({ ...cat, tipo: "Receita" }))
-        const catSaida = resSaida.data.data.filter(cat => cat.uid === usuario.uid)
-          .map(cat => ({ ...cat, tipo: "Despesa" }))
+      const catEntrada = resEntrada.data.map(cat => ({
+        ...cat,
+        tipo: "Receita"
+      }));
 
-        const todasCategorias = [...catEntrada, ...catSaida]
-        console.log(todasCategorias)
-        setIsLoading(false)
-        setCategorias(todasCategorias)
-      } catch (error) {
-        console.error("Erro ao buscar categorias:", error)
-        alert("Erro ao carregar categorias")
-        setIsLoading(false)
-      }
+      const catSaida = resSaida.data.map(cat => ({
+        ...cat,
+        tipo: "Despesa"
+      }));
+
+      setCategorias([...catEntrada, ...catSaida]);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Erro ao buscar categorias:", error);
+      alert("Erro ao carregar categorias");
+      setIsLoading(false);
     }
+  };
 
-    fetchCategorias()
-  }, [usuario])
+  fetchCategorias();
+}, [uid, id_usuario]);
+
 
   return (
     <div className="campo mx-4">

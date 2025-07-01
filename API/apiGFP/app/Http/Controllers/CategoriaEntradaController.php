@@ -7,6 +7,7 @@ use App\Models\categoria_entrada;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class CategoriaEntradaController extends Controller
 {
@@ -90,10 +91,10 @@ class CategoriaEntradaController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id_categoria_entrada' => '',
-            'id_usuario' => '', 
+            'id_usuario' => '',
             'nome' => '',
             'status' => '',
-            
+
         ]);
 
         if ($validator->fails()) {
@@ -156,5 +157,14 @@ class CategoriaEntradaController extends Controller
             'sucesso' => false,
             'mensagem' => 'Erro ao deletar as informações sobre o(a) Categoria_entrada(a)'
         ], 500);
+    }
+
+    public function categoriasEntradaUsuario(Request $request)
+    {
+        return DB::table('categoria_entradas')
+            ->select('id_Categoria_entrada', 'nome', 'uid', 'id_usuario')
+            ->where('uid', $request->uid)
+            ->where('id_usuario', $request->id_usuario)
+            ->get();
     }
 }

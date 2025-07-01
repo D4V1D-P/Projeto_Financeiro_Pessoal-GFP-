@@ -6,39 +6,48 @@ import AddConta from "../components/addConta";
 import axios from "axios";
 import { getUsuarioLogado } from "../utils/user";
 import Loader from '../components/spiner2'
+import { auth } from "../firebase";
 
 function Contas() {
 
   const [isAdd, setIsAdd] = useState(false)
   const [contas, setContas] = useState([])
-  const [usuario, setUsuario] = useState(null);
-   const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
+  const [id_usuario, setIdUsuario] = useState("");
+  const [uid, setUid] = useState("");
 
-useEffect(() => {
-    const fetchUser = async () => {
-      const user = await getUsuarioLogado();
-      if (user) {
-        setUsuario(user);
-      } else {
-        alert("Usuário não encontrado ou não logado");
-      }
-    };
+  useEffect(() => {
+  const fetchUser = async () => {
+    const user = await getUsuarioLogado();
+    const currentUser = auth.currentUser;
+    if (user) {
+      setIdUsuario(user.id_usuario);
+      setUid(user.uid);
+    } else if (currentUser) {
+      setUid(currentUser.uid);
+    }
+  }
 
-    fetchUser();
-  }, []);
+  fetchUser();
+}, []);
   
     useEffect(() => {
-      if (!usuario) return;
+       if (!uid || !id_usuario) return;
+
       const fetchConta = async () => {
-        const response = await axios.get("http://localhost:8000/api/Conta");
-        const contasUsuario = response.data.data.filter(
-          (i) => usuario.uid === i.uid
-        );
-        setIsLoading(false)
-        setContas(contasUsuario);
+        try {
+          const params = { uid, id_usuario };
+          const response = await axios.get('http://localhost:8000/api/contas-usuario', { params })
+          setContas(response.data)
+          console.log(response.data);
+        } catch (error) {
+          console.error("Erro ao buscar contas:", error);
+        }finally{
+          setIsLoading(false)
+        }
       };
       fetchConta();
-    }, [usuario]);
+    }, [uid, id_usuario]);
 
   const adicionarConta = () => {
     setIsAdd(true)

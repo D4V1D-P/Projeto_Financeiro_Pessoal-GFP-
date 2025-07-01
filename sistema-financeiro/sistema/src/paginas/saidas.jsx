@@ -3,7 +3,7 @@ import axios from "axios";
 //import Tableentradas from "../components/tableentradas";
 import { getUsuarioLogado } from "../utils/user";
 
-const Saidas = () => {
+const Entradas = () => {
   const [categoria, setCategoria] = useState("");
   const [valor, setValor] = useState("");
   const [data, setData] = useState("");
@@ -11,7 +11,8 @@ const Saidas = () => {
   const [conta, setConta] = useState("");
   const [pag, setPag] = useState("");
 
-  const [usuario, setUsuario] = useState(null);
+  const [uid, setUid] = useState("");
+  const [id_usuario, setIdUsuario] = useState("");
   const [categorias, setCategorias] = useState([]);
   const [contas, setContas] = useState([]);
   const [pagamentos, setPagamentos] = useState([]);
@@ -20,7 +21,8 @@ const Saidas = () => {
     const fetchUser = async () => {
       const user = await getUsuarioLogado();
       if (user) {
-        setUsuario(user);
+        setUid(user.uid);
+        setIdUsuario(user.id_usuario);
       } else {
         alert("Usuário não encontrado ou não logado");
       }
@@ -30,50 +32,60 @@ const Saidas = () => {
   }, []);
 
   useEffect(() => {
-    if (!usuario) return;
+    if (!uid || !id_usuario) return;
+
+    const params = { uid, id_usuario };
+
     const fetchCategoria = async () => {
-      const response = await axios.get(
-        "http://localhost:8000/api/CategoriaSaida"
-      );
-      const categoriasUsuario = response.data.data.filter(
-        (i) => usuario.uid === i.uid
-      );
-      console.log(categoriasUsuario);
-      setCategorias(categoriasUsuario);
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/api/categorias-saida-usuario",
+          { params }
+        );
+        setCategorias(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar categorias", error);
+      }
     };
-    fetchCategoria();
-  }, [usuario]);
 
-  useEffect(() => {
-    if (!usuario) return;
     const fetchConta = async () => {
-      const response = await axios.get("http://localhost:8000/api/Conta");
-      const contasUsuario = response.data.data.filter(
-        (i) => usuario.uid === i.uid
-      );
-      setContas(contasUsuario);
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/api/contas-usuario",
+          { params }
+        );
+        setContas(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar contas", error);
+      }
     };
-    fetchConta();
-  }, [usuario]);
 
-  useEffect(() => {
-    if (!usuario) return;
-    const fetchTipoPag = async () => {
-      const response = await axios.get(
-        "http://localhost:8000/api/tipo_pagamento"
-      );
-      const pagamentosUsuario = response.data.data.filter(
-        (i) => usuario.uid === i.uid
-      );
-      setPagamentos(pagamentosUsuario);
+    const fetchPagamentos = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/api/tipo-pagamento-usuario",
+          { params }
+        );
+        setPagamentos(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar tipos de pagamento", error);
+      }
     };
-    fetchTipoPag();
-  }, [usuario]);
+
+    fetchCategoria();
+    fetchConta();
+    fetchPagamentos();
+  }, [uid, id_usuario]);
 
   const Enviardados = (e) => {
+    if (!categoria || !conta || !pag) {
+      alert("Preencha todos os campos obrigatórios.");
+      return;
+    }
+
     e.preventDefault();
     const novaSaida = {
-      id_usuario: usuario.id_usuario,
+      id_usuario: id_usuario,
       id_Categoria_saida: categoria,
       valor,
       data,
@@ -81,16 +93,16 @@ const Saidas = () => {
       id_Tipo_pagamento: pag,
       id_conta: conta,
       status: "ativo",
-      uid: usuario.uid,
+      uid: uid,
     };
     console.log(novaSaida);
     axios
       .post("http://localhost:8000/api/despesas", novaSaida)
       .then(() => {
-        alert("despesa adicionada!");
+        alert("entrada adicionada!");
       })
       .catch((erro) => {
-        alert("erro ao cadastrar despesa" + erro);
+        alert("erro ao cadastrar saida" + erro);
       });
   };
 
@@ -103,25 +115,25 @@ const Saidas = () => {
             <h5>Adicionar nova despesa</h5>
             <div className="row mb-3 mt-4">
               <div className="col-md-6 r campoLabel">
-                <label htmlFor="id_Categoria_saida" className="label">
+                <label htmlFor="id_Categoria_entrada" className="label">
                   categoria
                 </label>
                 <select
-                  name="id_Categoria_saida"
-                  id="id_Categoria_saida"
+                  name="id_Categoria_entrada"
+                  id="id_Categoria_entrada"
                   required
                   value={categoria}
                   onChange={(e) => setCategoria(e.target.value)}
                 >
-                  {categorias.length !== 0 ? (
-                    categorias.map((e) => (
-                      <option key={e.id_Categoria_saida} value={e.id_Categoria_saida} >
-                        {e.nome}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="">carregando...</option>
-                  )}
+                  <option value="">Selecione uma categoria</option>
+                  {categorias.map((e) => (
+                    <option
+                      key={e.id_Categoria_entrada}
+                      value={e.id_Categoria_entrada}
+                    >
+                      {e.nome}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="col-md-6 campoLabel">
@@ -140,24 +152,25 @@ const Saidas = () => {
             </div>
             <div className="row mb-3 gap-3">
               <div className="col-md-12 r campoLabel">
-                <label htmlFor="id_Categoria_saida" className="label">
+                <label htmlFor="id_Categoria_entrada" className="label">
                   Tipo Pagamento
                 </label>
                 <select
-                  name="id_Categoria_saida"
-                  id="id_Categoria_saida"
+                  name="id_Tipo_pagamento"
+                  id="id_Tipo_pagamento"
                   value={pag}
                   onChange={(e) => setPag(e.target.value)}
+                  required
                 >
-                  {pagamentos.length !== 0 ? (
-                    pagamentos.map((e) => (
-                      <option key={e.id_Tipo_pagamento} value={e.id_Tipo_pagamento}>
-                        {e.nome}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="">carregando...</option>
-                  )}
+                  <option value="">Selecione um tipo de pagamento</option>
+                  {pagamentos.map((e) => (
+                    <option
+                      key={e.id_Tipo_pagamento}
+                      value={e.id_Tipo_pagamento}
+                    >
+                      {e.nome}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="col-md-12 campoLabel">
@@ -184,16 +197,14 @@ const Saidas = () => {
                   id="id_conta"
                   value={conta}
                   onChange={(e) => setConta(e.target.value)}
+                  required
                 >
-                  {contas.length !== 0 ? (
-                    contas.map((e) => (
-                      <option key={e.id_conta} value={e.id_conta}>
-                        {e.banco_nome}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="">carregando...</option>
-                  )}
+                  <option value="">Selecione uma conta</option>
+                  {contas.map((e) => (
+                    <option key={e.id_conta} value={e.id_conta}>
+                      {e.banco_nome}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="col-md-12 campoLabel">
@@ -219,9 +230,9 @@ const Saidas = () => {
           </div>
         </form>
       </div>
-      {/* <Tablesaidas/> */}
+      {/* <Tableentradas /> */}
     </>
   );
 };
 
-export default Saidas;
+export default Entradas;

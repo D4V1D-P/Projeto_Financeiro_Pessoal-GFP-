@@ -7,6 +7,7 @@ use App\Models\CategoriaSaida;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class CategoriaSaidaController extends Controller
 {
@@ -156,5 +157,13 @@ class CategoriaSaidaController extends Controller
             'sucesso' => false,
             'mensagem' => 'Erro ao deletar as informações sobre o(a) Categoria Saida'
         ], 500);
+    }
+
+    public function categoriasSaidaUsuario(Request $request)
+    {
+        return DB::table('categoria_saidas')
+            ->select('id_Categoria_saida', 'nome', 'uid')
+            ->where('uid', $request->uid)
+            ->get();
     }
 }
