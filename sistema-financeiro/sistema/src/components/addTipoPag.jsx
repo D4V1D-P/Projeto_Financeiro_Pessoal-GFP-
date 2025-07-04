@@ -2,11 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
 import { getUsuarioLogado } from "../utils/user";
+import Loader from "./spiner";
 
 const AddTipoPag = (props) => {
   const history = useHistory();
   const [nome, setNome] = useState("");
   const [usuario, setUsuario] = useState(null);
+
+  const [btn, setBtn] = useState('Adicionar')
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -23,9 +26,11 @@ const AddTipoPag = (props) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setBtn(Loader)
 
     if (!usuario) {
       alert("Usuário não carregado!");
+      setBtn("Adicionar")
       return;
     }
 
@@ -41,9 +46,11 @@ const AddTipoPag = (props) => {
       .then(() => {
         alert("Categoria cadastrada com sucesso!");
         history.push("/Categorias");
+        setBtn("Adicionar")
       })
       .catch((err) => {
         alert("Erro ao cadastrar categoria: " + err);
+        setBtn("Adicionar")
       });
   };
 
@@ -76,7 +83,7 @@ const AddTipoPag = (props) => {
             <div className="col-sm-12">
               <button
                 onClick={props.onClose}
-                className="btn btn-light w-100 mt-2"
+                className="btn btn-light w-100 mt-2 btn-gfp"
                 style={{ borderRadius: "10px" }}
               >
                 Voltar

@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
 import { getUsuarioLogado } from "../utils/user";
+import Loader from "./spiner";
 
 const AddCategoria = (props) => {
   const history = useHistory();
   const [nome, setNome] = useState("");
   const [categoria, setCategoria] = useState("");
   const [usuario, setUsuario] = useState(null);
+
+  const [btn, setBtn] = useState('Adicionar')
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -24,10 +27,13 @@ const AddCategoria = (props) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setBtn(Loader)
 
     if (!usuario) {
       alert("Usuário não carregado!");
+      setBtn("Adicionar")
       return;
+
     }
 
     const novaCategoria = {
@@ -53,13 +59,16 @@ const AddCategoria = (props) => {
         .post("http://localhost:8000/api/CategoriaSaida", novaCategoria)
         .then(() => {
           alert("Categoria cadastrada com sucesso!");
+          setBtn("Adicionar")
           history.push("/Categorias");
         })
         .catch((err) => {
           alert("Erro ao cadastrar categoria: " + err);
+          setBtn("Adicionar")
         });
     } else {
       alert("selecione um tipo de categoria");
+      setBtn("Adicionar")
     }
   };
 
@@ -103,13 +112,13 @@ const AddCategoria = (props) => {
           <div className="row">
             <div className="col-md-12">
               <button className="botao" type="submit">
-                Adicionar
+                {btn}
               </button>
             </div>
             <div className="col-sm-12">
               <button
                 onClick={props.onClose}
-                className="btn btn-light w-100 mt-2"
+                className="btn btn-light w-100 mt-2 btn-gfp"
                 style={{ borderRadius: "10px" }}
               >
                 Voltar

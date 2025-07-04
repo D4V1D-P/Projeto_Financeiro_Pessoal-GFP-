@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
 import { getUsuarioLogado } from "../utils/user";
+import Loader from "./spiner";
 
 const AddConta = (props) => {
   const history = useHistory();
@@ -10,6 +11,8 @@ const AddConta = (props) => {
   const [banco_nome, setBanco_nome] = useState("");
   const [descricao_banco, setDescricao_banco] = useState("");
   const [saldo, setSaldo] = useState("");
+
+  const [btn, setBtn] = useState('Adicionar')
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -26,9 +29,11 @@ const AddConta = (props) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setBtn(Loader)
 
     if (!usuario) {
       alert("Usuário não carregado!");
+      setBtn("Adicionar")
       return;
     }
 
@@ -46,9 +51,11 @@ const AddConta = (props) => {
       .then(() => {
         alert("Conta cadastrada com sucesso!");
         history.push("/Contas");
+        setBtn("Adicionar")
       })
       .catch((err) => {
         alert("Erro ao cadastrar categoria: " + err);
+        setBtn("Adicionar")
       });
   };
 
@@ -57,7 +64,7 @@ const AddConta = (props) => {
       <form onSubmit={handleSubmit}>
         <div className="areaUpdate p-5">
           <div className="mb-4">
-            <h2>Adicionar categoria</h2>
+            <h2>Adicionar Conta</h2>
           </div>
           <div className="row mb-4">
             <div className="col-md-12 campoLabel">
@@ -107,7 +114,7 @@ const AddConta = (props) => {
             <div className="col-sm-12">
               <button
                 onClick={props.onClose}
-                className="btn btn-light w-100 mt-2"
+                className="btn btn-light w-100 mt-2 btn-gfp"
                 style={{ borderRadius: "10px" }}
               >
                 Voltar

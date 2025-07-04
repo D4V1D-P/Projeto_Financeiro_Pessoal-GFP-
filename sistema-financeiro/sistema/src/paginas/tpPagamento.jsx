@@ -88,7 +88,7 @@ function TPPagamento() {
                   </Link>
                 </td>
                 <td className="v-a">
-                  <button className="btn mb-2 mt-2 align-middle">
+                  <button onClick={() => Handledelete(e)} className="btn mb-2 mt-2 align-middle">
                     <FontAwesomeIcon icon={faTrashCan} style={{ color: "#E9332E", height: "18px" }} />
                   </button>
                 </td>
@@ -99,6 +99,16 @@ function TPPagamento() {
       </div>
     </div>
   );
+
+    function Handledelete(e) {
+    const confirm = window.confirm(`Deseja apagar o tipo de pagamento ${e.nome}?`);
+    if (!confirm) return;
+    console.log(`http://localhost:8000/api/tipo_pagamento/${e.id_Tipo_pagamento}`)
+    axios.delete(`http://localhost:8000/api/tipo_pagamento/${e.id_Tipo_pagamento}`).then(() => {
+      alert("tipo de pagamento apagado com sucesso!");
+    });
+  }
+
 }
 
 export default TPPagamento;
