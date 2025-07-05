@@ -7,6 +7,7 @@ use App\Models\despesas;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class DespesasController extends Controller
 {
@@ -169,4 +170,37 @@ class DespesasController extends Controller
             'mensagem' => 'Erro ao deletar as informações sobre o(a) Despesa(a)'
         ], 500);
     }
+
+    public function getDespesasDoUsuario(Request $request)
+{
+    $uid = $request->uid;
+
+    if (!$uid) {
+        return response()->json([
+            'sucesso' => false,
+            'mensagem' => 'ID do usuário não fornecido.'
+        ], 400);
+    }
+
+    $despesas = DB::table('despesas')
+        ->leftJoin('categoria_saidas', 'despesas.id_Categoria_saida', '=', 'categoria_saidas.id_Categoria_saida')
+        ->leftJoin('tipo_pagamentos', 'despesas.id_Tipo_pagamento', '=', 'tipo_pagamentos.id_Tipo_pagamento')
+        ->leftJoin('contas', 'despesas.id_conta', '=', 'contas.id_conta')
+        ->where('despesas.uid', $uid)
+        ->select(
+            'despesas.id',
+            'despesas.valor',
+            'despesas.data',
+            'despesas.descricao',
+            'despesas.status',
+            'categoria_saidas.nome as nome_categoria',
+            'tipo_pagamentos.nome as tipo_pagamento',
+            'contas.banco_nome as nome_conta'
+        )
+        ->orderBy('despesas.data', 'desc')
+        ->get();
+
+    return response()->json($despesas);
+}
+
 }

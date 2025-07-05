@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { faPenToSquare, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link } from "react-router-dom/cjs/react-router-dom";
 import AddConta from "../components/addConta";
 import axios from "axios";
 import { getUsuarioLogado } from "../utils/user";
 import Loader from "../components/spiner2";
 import { auth } from "../firebase";
+import UpdateConta from "../components/updateConta";
 
 function Contas() {
   const [isAdd, setIsAdd] = useState(false);
@@ -14,6 +14,8 @@ function Contas() {
   const [isLoading, setIsLoading] = useState(true);
   const [id_usuario, setIdUsuario] = useState("");
   const [uid, setUid] = useState("");
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [contaSelecionada, setContaSelecionada] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -56,12 +58,20 @@ function Contas() {
     console.log("aaaaaaaa");
   };
 
-  const Fechar = () => {
-    setIsAdd(false);
-  };
+ const Fechar = () => {
+  setIsAdd(false);
+  setIsUpdate(false);
+};
+
+
+  const AtualizarConta = (e) => {
+    setContaSelecionada(e);
+    setIsUpdate(true);
+  }
   return (
     <div className="campo mx-4">
       {isAdd && <AddConta onClose={Fechar} />}
+      {isUpdate &&  <UpdateConta conta={contaSelecionada} onClose={Fechar}/>}
       <div className="div3 w-80 ">
         <div className="row mb-4 w-60">
           <div className="col-sm-6">
@@ -93,19 +103,18 @@ function Contas() {
             {contas.map((e, i) => (
               <tr key={i}>
                 <th scope="row" className="v-a">
-                  {" "}
-                  {i + 1}{" "}
+                  {i + 1}
                 </th>
                 <td className="v-a fw-bolder">{e.banco_nome}</td>
                 <td className="v-a fw-medium">{e.descricao_banco}</td>
                 <td className="v-a fw-medium">{e.saldo}</td>
                 <td className="v-a">
-                  <Link to={`/`} className="mb-2 mt-2 align-middle">
+                  <button onClick={()=> AtualizarConta(e)}  className="mb-2 mt-2 btn align-middle">
                     <FontAwesomeIcon
                       icon={faPenToSquare}
                       style={{ color: "#204A77", height: "18px" }}
                     />
-                  </Link>
+                  </button>
                 </td>
                 <td className="v-a">
                   <button

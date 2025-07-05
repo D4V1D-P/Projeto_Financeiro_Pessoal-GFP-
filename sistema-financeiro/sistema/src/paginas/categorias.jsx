@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { auth } from "../firebase"
 import axios from "axios";
-import { Link } from "react-router-dom/cjs/react-router-dom";
 import { faPenToSquare, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import AddCategoria from "../components/addCategoria";
 import { getUsuarioLogado } from "../utils/user";
 import Loader from '../components/spiner2'
+import UpdateCategoria from "../components/updateCategoria";
 
 
 function Categorias() {
@@ -16,6 +16,9 @@ function Categorias() {
   const [isLoading, setIsLoading] = useState(true)
   const [uid, setUid] = useState("");
   const [id_usuario, setIdUsuario] = useState("");
+  const [isUpdate, setIsUpdate] = useState(false)
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState(null)
+
 
   const modalCategoria = () => {
     setIsAdd(true)
@@ -23,6 +26,12 @@ function Categorias() {
 
   const Fechar = () => {
     setIsAdd(false)
+    setIsUpdate(false)
+  }
+
+  const AtualizarCategoria = (categoria) => {
+    setCategoriaSelecionada(categoria)
+    setIsUpdate(true)
   }
 
   useEffect(() => {
@@ -79,6 +88,8 @@ function Categorias() {
   return (
     <div className="campo mx-4">
       {isAdd && <AddCategoria onClose={Fechar} />}
+      {isUpdate && categoriaSelecionada && ( <UpdateCategoria categoria={categoriaSelecionada} onClose={Fechar}/>)}
+
       <div className="div3 w-80">
         <div className="row mb-4 w-60">
           <div className="col-sm-6">
@@ -112,12 +123,12 @@ function Categorias() {
                   {cat.tipo}
                 </td>
                 <td className="v-a">
-                  <Link to={`/`} className="mb-2 mt-2 align-middle">
+                  <button onClick={() => AtualizarCategoria(cat)} className="btn mb-2 mt-2 align-middle">
                     <FontAwesomeIcon
                       icon={faPenToSquare}
                       style={{ color: "#204A77", height: "18px" }}
                     />
-                  </Link>
+                  </button>
                 </td>
                 <td className="v-a">
                   <button onClick={() => Handledelete(cat)} className="btn mb-2 mt-2 align-middle">

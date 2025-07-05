@@ -10,6 +10,7 @@ use App\Http\Controllers\CategoriaSaidaController;
 use App\Http\Controllers\ContaController;
 use App\Http\Controllers\TipoPagamentoController;
 use App\Http\Controllers\DashboardController;
+use App\Models\Despesas;
 use App\Models\Usuarios;
 use Kreait\Firebase\Auth;
 use Kreait\Firebase\Factory;
@@ -38,6 +39,8 @@ Route::get('/receitas/{codigo}', [ReceitasController::class, 'show']);
 Route::post('/receitas', [ReceitasController::class, 'store']);
 Route::put('/receitas/{id}', [ReceitasController::class, 'update']);
 Route::delete('/receitas/{id}', [ReceitasController::class, 'destroy']);
+Route::get('/receitas-usuario', [ReceitasController::class, 'getReceitasDoUsuario']);
+
 
 //Rotas para o CRUD das Despesas
 Route::get('/despesas', [DespesasController::class, 'index']);
@@ -45,6 +48,7 @@ Route::get('/despesas/{codigo}', [DespesasController::class, 'show']);
 Route::post('/despesas', [DespesasController::class, 'store']);
 Route::put('/despesas/{id}', [DespesasController::class, 'update']);
 Route::delete('/despesas/{id}', [DespesasController::class, 'destroy']);
+Route::get('/despesas-usuario', [DespesasController::class, 'getDespesasDoUsuario']);
 
 //Rotas para o CRUD da categoria_entrada
 Route::get('/categoria_entrada', [CategoriaEntradaController::class, 'index']);

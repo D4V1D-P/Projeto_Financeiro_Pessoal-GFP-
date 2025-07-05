@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { faPenToSquare, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link } from "react-router-dom/cjs/react-router-dom";
 import AddTipoPag from "../components/addTipoPag";
 import axios from "axios";
 import { getUsuarioLogado } from "../utils/user";
 import Loader from '../components/spiner2';
 import { auth } from "../firebase";
+import UpdatePagamento from "../components/updatePagamento";
 
 function TPPagamento() {
   const [isAdd, setIsAdd] = useState(false);
@@ -14,9 +14,15 @@ function TPPagamento() {
   const [pagamentos, setPagamentos] = useState([]);
   const [id_usuario, setIdUsuario] = useState("");
   const [uid, setUid] = useState("");
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [tipoPagSelecionado, setTipoPagSelecionado] = useState(null);
 
   const Adicionar = () => setIsAdd(true);
-  const Fechar = () => setIsAdd(false);
+  const Fechar = () => {
+    setIsAdd(false);
+    setIsUpdate(false);
+    setTipoPagSelecionado(null);
+  }
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -52,9 +58,16 @@ function TPPagamento() {
     fetchPagamentos();
   }, [uid, id_usuario]);
 
+  const HandleUpdate = (e) => {
+    setIsUpdate(true);
+    setTipoPagSelecionado(e);
+  }
+
+
   return (
     <div className="campo mx-4">
       {isAdd && <AddTipoPag onClose={Fechar} />}
+      {isUpdate && <UpdatePagamento tipoPag={tipoPagSelecionado} onClose={Fechar} />}
       <div className="div3 w-80">
         <div className="row mb-4 w-60">
           <div className="col-sm-6">
@@ -83,9 +96,9 @@ function TPPagamento() {
                 <th scope="row" className="v-a"> {i + 1} </th>
                 <td className="v-a fw-bolder">{e.nome}</td>
                 <td className="v-a">
-                  <Link to={`/`} className="mb-2 mt-2 align-middle">
+                  <button onClick={() => HandleUpdate(e)} className="btn mb-2 mt-2 align-middle">
                     <FontAwesomeIcon icon={faPenToSquare} style={{ color: "#204A77", height: "18px" }} />
-                  </Link>
+                  </button>
                 </td>
                 <td className="v-a">
                   <button onClick={() => Handledelete(e)} className="btn mb-2 mt-2 align-middle">

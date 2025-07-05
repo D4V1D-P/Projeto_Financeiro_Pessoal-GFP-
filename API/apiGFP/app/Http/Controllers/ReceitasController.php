@@ -7,6 +7,7 @@ use App\Models\receitas;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class ReceitasController extends Controller
 {
@@ -167,4 +168,38 @@ class ReceitasController extends Controller
             'mensagem' => 'Erro ao deletar as informações sobre o(a) Receita(a)'
         ], 500);
     }
+
+
+public function getReceitasDoUsuario(Request $request)
+{
+    $uid = $request->uid;
+
+    if (!$uid) {
+        return response()->json([
+            'sucesso' => false,
+            'mensagem' => 'ID do usuário não fornecido.'
+        ], 400);
+    }
+
+    $receitas = DB::table('receitas')
+        ->leftJoin('categoria_entradas', 'receitas.id_Categoria_entrada', '=', 'categoria_entradas.id_Categoria_entrada')
+        ->leftJoin('tipo_pagamentos', 'receitas.id_Tipo_pagamento', '=', 'tipo_pagamentos.id_Tipo_pagamento')
+        ->leftJoin('contas', 'receitas.id_conta', '=', 'contas.id_conta')
+        ->where('receitas.uid', $uid)
+        ->select(
+            'receitas.id',
+            'receitas.valor',
+            'receitas.data',
+            'receitas.descricao',
+            'receitas.status',
+            'categoria_entradas.nome as nome_categoria',
+            'tipo_pagamentos.nome as tipo_pagamento',
+            'contas.banco_nome as nome_conta'
+        )
+        ->orderBy('receitas.data', 'desc')
+        ->get();
+
+    return response()->json($receitas);
+}
+
 }

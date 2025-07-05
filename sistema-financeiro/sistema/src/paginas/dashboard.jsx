@@ -122,7 +122,7 @@ const Dashboard = () => {
   };
 
   const topProdutosGastos = {
-    labels: topGastos.map((item) => item.id_Categoria_saida),
+    labels: topGastos.map((item) => item.nome_categoria || "Desconhecida"),
     datasets: [
       {
         label: "Categoria",
@@ -151,7 +151,7 @@ const Dashboard = () => {
   };
 
   const topGastosCategoria = {
-    labels: topCategorias.map((item2) => item2.id_Categoria_saida),
+    labels: topCategorias.map((item2) => item2.nome_categoria || "Desconhecida"),
     datasets: [
       {
         label: "Gastos por Categoria",
@@ -178,7 +178,7 @@ const Dashboard = () => {
   };
 
   const topGastosPag = {
-    labels: tipoPag.map((item3) => item3.id_Tipo_pagamento),
+    labels: tipoPag.map((item3) => item3.tipo_pagamento || "Não informado"),
     datasets: [
       {
         label: "Gastos por Tipo de Pagamento",
@@ -195,6 +195,7 @@ const Dashboard = () => {
       },
     ],
   };
+
 
   const Gastosaolongodotempo = {
     labels: gastostempo.map((item4) =>
@@ -358,7 +359,41 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="row mt-4">
-                <div className="col-6">
+                
+                <div className="col-6 mt-3">
+                  <div className="border2 p-4">
+                    <div className="d-flex">
+                      <h5 style={{ marginRight: "8px" }}>
+                        Gastos por Tipo de Pagamento
+                      </h5>
+                      <FontAwesomeIcon icon={faChartPie} color="#003366" />
+                    </div>
+                    <div style={{ height: "280px", width: "100%" }}>
+                      <Pie
+                        data={topGastosPag}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: false,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="col-6  mt-3 mb-3">
+                  <div className="border2 p-3">
+                    <div className="d-flex">
+                      <h5 style={{ marginRight: "8px" }}>Gastos por Categoria</h5>
+                      <FontAwesomeIcon icon={faChartColumn} color="#003366" />
+                    </div>
+                    <div style={{ height: "280px", width: "100%" }}>
+                      <Bar
+                        data={topGastosCategoria}
+                        options={{ responsive: true, maintainAspectRatio: false }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="col-12">
                   <div className="border2 p-3">
                     <div className="d-flex">
                       <h5 style={{ marginRight: "8px" }}>
@@ -378,25 +413,6 @@ const Dashboard = () => {
                     </div>
                   </div>
                 </div>
-                <div className="col-6">
-                  <div className="border2 p-4">
-                    <div className="d-flex">
-                      <h5 style={{ marginRight: "8px" }}>
-                        Gastos por Tipo de Pagamento
-                      </h5>
-                      <FontAwesomeIcon icon={faChartPie} color="#003366" />
-                    </div>
-                    <div style={{ height: "280px", width: "100%" }}>
-                      <Pie
-                        data={topGastosPag}
-                        options={{
-                          responsive: true,
-                          maintainAspectRatio: false,
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -409,7 +425,7 @@ const Dashboard = () => {
                         <span>{e.id}</span>
                       </div>
                       <div className="col-6 flex-column d-flex justify-content-center">
-                        <span>{e.categoria}</span>
+                        <span>{e.nome_categoria}</span>
                         <p className="text-secondary p-0 m-0">
                           {new Date(e.data).toLocaleDateString("pt-BR")}
                         </p>
@@ -428,7 +444,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="col-xl-6 mb-3">
+            {/* <div className="col-xl-6 mb-3">
               <div className="border2 p-3">
                 <div className="d-flex">
                   <h5 style={{ marginRight: "8px" }}>Top 5 maiores gastos</h5>
@@ -445,21 +461,8 @@ const Dashboard = () => {
                   />
                 </div>
               </div>
-            </div>
-            <div className="col-xl-6 mb-3">
-              <div className="border2 p-3">
-                <div className="d-flex">
-                  <h5 style={{ marginRight: "8px" }}>Gastos por Categoria</h5>
-                  <FontAwesomeIcon icon={faChartColumn} color="#003366" />
-                </div>
-                <div style={{ height: "280px", width: "100%" }}>
-                  <Bar
-                    data={topGastosCategoria}
-                    options={{ responsive: true, maintainAspectRatio: false }}
-                  />
-                </div>
-              </div>
-            </div>
+            </div> */}
+
           </div>
         </div>
       </div>

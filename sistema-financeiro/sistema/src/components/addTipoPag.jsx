@@ -76,8 +76,8 @@ const AddTipoPag = (props) => {
           </div>
           <div className="row">
             <div className="col-md-12">
-              <button className="botao" type="submit">
-                Adicionar
+              <button className="botao btn-gfp" type="submit">
+                {btn}
               </button>
             </div>
             <div className="col-sm-12">
