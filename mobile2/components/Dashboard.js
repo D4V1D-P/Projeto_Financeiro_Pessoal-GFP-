@@ -1,252 +1,398 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Text, View, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Platform
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  TextInput,
+  TouchableOpacity,
 } from 'react-native';
-import { BarChart, LineChart, PieChart } from 'react-native-chart-kit';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import Toast from 'react-native-toast-message';
- 
-const diasDaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-const screenWidth = Dimensions.get('window').width;
-const periodOptions = ['Dia', 'Semana', 'Mês', 'Ano'];
- 
-// Exemplo de dados
-const dadosJSON = [
-  { data: '2024-11-11 00:00:00', valor: 1000, tipo_pagamento: 'cartao' },
-  { data: '2024-11-12 00:00:00', valor: 2000, tipo_pagamento: 'dinheiro' },
-  { data: '2024-11-13 00:00:00', valor: 1500, tipo_pagamento: 'cartao' },
-  { data: '2024-11-14 00:00:00', valor: 3000, tipo_pagamento: 'outros' },
-  { data: '2024-11-15 00:00:00', valor: 500, tipo_pagamento: 'dinheiro' },
-];
- 
-function groupByDay(data) {
-  const result = {};
-  data.forEach(item => {
-    const date = new Date(item.data.replace(' ', 'T'));
-    const day = diasDaSemana[date.getDay()];
-    if (!result[day]) result[day] = 0;
-    result[day] += Number(item.valor);
-  });
-  return result;
-}
- 
-export default function Dashboard() {
-  const [periodo, setPeriodo] = useState('Dia');
-  const [dateFrom, setDateFrom] = useState(new Date('2024-11-01'));
-  const [dateTo, setDateTo] = useState(new Date('2024-11-30'));
-  const [showFromPicker, setShowFromPicker] = useState(false);
-  const [showToPicker, setShowToPicker] = useState(false);
- 
-  const dadosFiltrados = dadosJSON.filter(item => {
-    const dataItem = new Date(item.data.replace(' ', 'T'));
-    return dataItem >= dateFrom && dataItem <= dateTo;
-  });
- 
-  const dadosAgrupados = groupByDay(dadosFiltrados);
-  const labels = Object.keys(dadosAgrupados);
-  const valores = Object.values(dadosAgrupados);
- 
-  // Dados para PieChart de tipo de pagamento
-  const tiposPagamento = {};
-  dadosFiltrados.forEach(item => {
-    if (!tiposPagamento[item.tipo_pagamento]) tiposPagamento[item.tipo_pagamento] = 0;
-    tiposPagamento[item.tipo_pagamento] += Number(item.valor);
-  });
-  const pieData = Object.keys(tiposPagamento).map((tipo, index) => ({
-    name: tipo,
-    population: tiposPagamento[tipo],
-    color: ['#2980b9', '#27ae60', '#8e44ad'][index % 3],
-    legendFontColor: '#7F7F7F',
-    legendFontSize: 12,
-  }));
- 
-  const chartConfig = {
-    backgroundGradientFrom: '#fff',
-    backgroundGradientTo: '#fff',
-    decimalPlaces: 2,
-    color: (opacity = 1) => `rgba(39, 174, 96, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    style: { borderRadius: 16 },
-    propsForDots: { r: '6', strokeWidth: '2', stroke: '#27ae60' },
+import axios from 'axios';
+import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+import { format, subDays } from 'date-fns';
+import { API_URL } from '../.env';
+import { MaskedTextInput } from 'react-native-mask-text';
+
+import { Dimensions } from 'react-native';
+const screenWidth = Dimensions.get('window').width - 40;
+
+const DashboardMobile = () => {
+  const uid = 'nxx1YdFKQUd8XSwFE6bnN9mQa422';
+  const [startDate, setStartDate] = useState('2024-01-01');
+  const [endDate, setEndDate] = useState('2025-09-21');
+  const [loading, setLoading] = useState(true);
+  const [dataDigitada, setDataDigitada] = useState('')
+  const [dataDigitada2, setDataDigitada2] = useState('')
+
+  const [gastostempo, setGastosTempo] = useState([]);
+  const [topGastos, setTopGastos] = useState([]);
+  const [tipoPag, setTipoPag] = useState([]);
+  const [saldototal, setSaldototal] = useState([]);
+  const [saidastotais, setSaidastotais] = useState([]);
+
+  const fetchData = async () => {
+    try {
+      const params = { startDate, endDate, uid };
+      const [gastoTempoRes, topGastoRes, tipoPagRes, saldoRes, saidasRes] =
+        await Promise.all([
+          axios.get(`${API_URL}/gastosaolongodotempo`, { params }),
+          axios.get(`${API_URL}/topgastos`, { params }),
+          axios.get(`${API_URL}/gastosportipopagamento`, { params }),
+          axios.get(`${API_URL}/saldototal`, { params }),
+          axios.get(`${API_URL}/saidastotais`, { params }),
+        ]);
+      setGastosTempo(gastoTempoRes.data);
+      setTopGastos(topGastoRes.data);
+      setTipoPag(tipoPagRes.data);
+      setSaldototal(saldoRes.data);
+      setSaidastotais(saidasRes.data);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível carregar os dados');
+      console.error(error);
+    }
   };
- 
+
+  const cores = [
+    'rgba(0, 51, 102, 0.500)',
+    'rgba(0, 51, 102, 0.995)',
+    'rgba(0, 51, 102, 0.849)',
+    'rgba(0, 51, 102, 0.705)',
+    'rgba(0, 51, 102, 0.534)',
+  ];
+
+  const dadosfiltrado = tipoPag.map((e, index) => {
+    const tipo = e.tipo_pagamento || 'Não informado';
+    return {
+      name: tipo,
+      valor: parseFloat(e.total),
+      color: cores[index % cores.length],
+    };
+  });
+
+  const formatarData = (dataString) => {
+    const [ano, mes, dia] = dataString.split(' ')[0].split('-');
+    return `${dia}/${mes}/${ano.slice(2)}`; // dd/mm/aa
+  };
+
+  const data2 =
+    gastostempo.length > 0
+      ? {
+          labels: gastostempo.map((item) => formatarData(item.data)),
+          datasets: [
+            {
+              data: gastostempo.map((item) => parseFloat(item.total)),
+              color: (opacity = 1) => `rgba(0, 219, 134, ${opacity})`,
+              strokeWidth: 3,
+            },
+          ],
+          legend: ['Gastos ao Longo do Tempo'],
+        }
+      : null;
+
+  const limitarTexto = (texto) => {
+    if (!texto) return 'X';
+    return texto.length > 7 ? texto.slice(0, 7) + '...' : texto;
+  };
+
+  const data4 = {
+    labels: topGastos.map((item) => limitarTexto(item.nome_categoria)),
+    datasets: [
+      {
+        data: topGastos.map((item) => parseFloat(item.valor)),
+      },
+    ],
+  };
+
   return (
-<ScrollView style={styles.container}>
-<Text style={styles.titulo}>Dashboard de Gastos</Text>
- 
-      <View style={styles.periodSelector}>
-        {periodOptions.map(option => (
-<TouchableOpacity
-            key={option}
-            style={[styles.periodButton, periodo === option && styles.periodButtonSelected]}
-            onPress={() => setPeriodo(option)}
->
-<Text style={[styles.periodButtonText, periodo === option && styles.periodButtonTextSelected]}>
-              {option}
-</Text>
-</TouchableOpacity>
-        ))}
-</View>
- 
-      <View style={styles.dateFilter}>
-<TouchableOpacity onPress={() => setShowFromPicker(true)} style={styles.dateButton}>
-<Text>De: {dateFrom.toLocaleDateString()}</Text>
-</TouchableOpacity>
-<TouchableOpacity onPress={() => setShowToPicker(true)} style={styles.dateButton}>
-<Text>Até: {dateTo.toLocaleDateString()}</Text>
-</TouchableOpacity>
- 
-        {showFromPicker && (
-<DateTimePicker
-            value={dateFrom}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={(event, selectedDate) => {
-              setShowFromPicker(Platform.OS === 'ios');
-              if (selectedDate) setDateFrom(selectedDate);
-            }}
-          />
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Dashboard</Text>
+
+      <View style={styles.filterContainer}>
+
+      <View style={styles.inputContainer}>
+      <Text style={styles.label}>Data Início:</Text>
+        <MaskedTextInput
+              mask="99/99/9999"
+              value={dataDigitada}
+              onChangeText={(text, rawText) => {
+                setDataDigitada(text);
+
+                if (rawText.length === 8) {
+                  const dia = rawText.substring(0, 2);
+                  const mes = rawText.substring(2, 4);
+                  const ano = rawText.substring(4, 8);
+                  const dataFormatada = `${ano}-${mes}-${dia}`;
+                  setStartDate(dataFormatada);
+                } else {
+                  setStartDate('');
+                }
+              }}
+              style={styles.input}
+              placeholder="Data (DD/MM/AAAA)"
+              keyboardType="numeric"
+            />
+      </View>
+
+        <View style={styles.inputContainer}>
+        <Text style={styles.label}>Data Fim:</Text>
+         <MaskedTextInput
+              mask="99/99/9999"
+              value={dataDigitada2}
+              onChangeText={(text, rawText) => {
+                setDataDigitada2(text);
+
+                if (rawText.length === 8) {
+                  const dia = rawText.substring(0, 2);
+                  const mes = rawText.substring(2, 4);
+                  const ano = rawText.substring(4, 8);
+                  const dataFormatada = `${ano}-${mes}-${dia}`;
+                  setEndDate(dataFormatada);
+                } else {
+                  setEndDate('');
+                }
+              }}
+              style={styles.input}
+              placeholder="Data (DD/MM/AAAA)"
+              keyboardType="numeric"
+            />
+      </View>
+        <TouchableOpacity style={styles.button} onPress={fetchData}>
+          <Text style={styles.buttonText}>Filtrar</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.cardDashboard}>
+        <View style={styles.card1}>
+          <Text style={{ color: 'white', fontSize: 13 }}>Despesas Totais:</Text>
+          {saidastotais.length > 0 ? (
+            <Text style={{ color: '#fff', fontSize: 17, fontWeight: 500 }}>
+              {' '}
+              R$ {saidastotais[0].total}
+            </Text>
+          ) : (
+            <Text style={{ color: '#fff', fontSize: 14 }}>Nada a exibir.</Text>
+          )}
+        </View>
+
+        <View style={styles.card2}>
+          <Text style={{ color: '#091242', fontSize: 13 }}>
+            Receitas Totais:
+          </Text>
+          {saldototal.length > 0 && saidastotais.length > 0 ? (
+            <Text style={{ color: '#091242', fontWeight: 500, fontSize: 17 }}>
+              R$ {saldototal[0].total}
+            </Text>
+          ) : (
+            <Text style={{ color: '#09124299', fontSize: 14 }}>
+              Nada a exibir.
+            </Text>
+          )}
+        </View>
+      </View>
+
+      <View style={styles.card3}>
+        <Text style={{ fontSize: 13 }}>Saldo Total:</Text>
+        {saldototal.length > 0 && saidastotais.length > 0 ? (
+          <Text style={{ color: '#091242', fontWeight: 500, fontSize: 17 }}>
+            R$ {saldototal[0].total - saidastotais[0].total}
+          </Text>
+        ) : (
+          <Text style={{ margin: 0 }}>Nada a exibir.</Text>
         )}
-        {showToPicker && (
-<DateTimePicker
-            value={dateTo}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={(event, selectedDate) => {
-              setShowToPicker(Platform.OS === 'ios');
-              if (selectedDate) setDateTo(selectedDate);
-            }}
-          />
-        )}
-</View>
- 
-      {labels.length === 0 ? (
-<Text style={styles.semDados}>Nenhum dado para o período selecionado.</Text>
-      ) : (
-<>
-<Text style={styles.subtitulo}>Top 5 maiores gastos</Text>
-<BarChart
-            data={{
-              labels: labels.slice(0, 5),
-              datasets: [{ data: valores.slice(0, 5) }],
-            }}
-            width={screenWidth - 20}
+      </View>
+
+      <View style={styles.grafico}>
+        <Text style={styles.title1}>Gastos por Categoria</Text>
+        <BarChart
+          data={data4}
+          width={screenWidth}
+          height={220}
+          yAxisLabel="$"
+          chartConfig={chartConfig}
+          showValuesOnTopOfBars={true}
+           style={{
+      borderRadius: 160
+    }}
+        />
+      </View>
+
+      <View style={styles.grafico}>
+        <Text style={styles.title1}>Gastos por Tipo de Pagamento</Text>
+        <PieChart
+          data={dadosfiltrado}
+          width={screenWidth}
+          height={200}
+          chartConfig={chartConfig}
+          accessor={'valor'}
+          backgroundColor={'transparent'}
+          absolute 
+          style={{
+      borderRadius: 16
+    }}
+        />
+      </View>
+
+      <View style={styles.grafico}>
+        <Text style={styles.title1}>Gastos por dia</Text>
+        {data2 && (
+          <LineChart
+            data={data2}
+            width={screenWidth}
             height={220}
-            fromZero
             chartConfig={chartConfig}
-            verticalLabelRotation={0}
-            showValuesOnTopOfBars
-            style={styles.grafico}
-          />
- 
-          <Text style={styles.subtitulo}>Total de gastos por data</Text>
-<LineChart
-            data={{
-              labels: labels,
-              datasets: [{ data: valores }],
-            }}
-            width={screenWidth - 20}
-            height={220}
-            chartConfig={chartConfig}
+            backgroundColor={'transparent'}
             bezier
-            style={styles.grafico}
+            style={{
+      borderRadius: 16
+    }}
           />
- 
-          <Text style={styles.subtitulo}>Gastos por Tipo de Pagamento</Text>
-<PieChart
-            data={pieData}
-            width={screenWidth - 20}
-            height={220}
-            chartConfig={chartConfig}
-            accessor="population"
-            backgroundColor="transparent"
-            paddingLeft="15"
-            absolute
-          />
- 
-          <Text style={styles.subtitulo}>Gastos por Categoria</Text>
-<BarChart
-            data={{
-              labels: labels,
-              datasets: [{ data: valores }],
-            }}
-            width={screenWidth - 20}
-            height={220}
-            fromZero
-            chartConfig={chartConfig}
-            verticalLabelRotation={45}
-            showValuesOnTopOfBars
-            style={styles.grafico}
-          />
-</>
-      )}
- 
-      <Toast />
-</ScrollView>
+        )}
+      </View>
+    </ScrollView>
   );
-}
- 
+};
+
+const chartConfig = {
+  backgroundGradientFrom: '#fff',
+  backgroundGradientFromOpacity: 1,
+  backgroundGradientTo: '#fff',
+  backgroundGradientToOpacity: 1,
+  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+  strokeWidth: 1, // optional, default 3
+  barPercentage: 0.5,
+  propsForDots: {
+    r: '6',
+    strokeWidth: '2',
+    stroke: '#003366',
+  }, 
+  style:{
+      borderRadius: 160
+    }
+};
+
+const chartColors = [
+  '#003366',
+  '#336699',
+  '#6699cc',
+  '#99ccff',
+  '#003344',
+  '#339966',
+];
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: '#f8f9fa',
+    padding: 15,
+    paddingBottom: 30,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
   },
-  titulo: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  subtitulo: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 20,
+  inputContainer: {
+    position: 'relative',
     marginBottom: 10,
-    textAlign: 'center',
+  },
+    label: {
+    position: 'absolute',
+    top: -10,
+    left: 15,
+    fontSize: 15,
+    zIndex: 1,
+    backgroundColor: '#fff', // mesma cor do fundo do input
+    paddingHorizontal: 10,
+    width: 'auto', // deixa o tamanho conforme o texto
   },
   grafico: {
-    marginVertical: 8,
-    borderRadius: 16,
+    borderStyle: 'solid',
+    shadowColor: 'rgba(0, 0, 0, 0.25)',
+    elevation: 2,
+    padding: 10,
+    marginTop: 10,
+    marginBottom: 30,
+    borderEndEndRadius: 25,
+    borderTopLeftRadius: 25,
   },
-  periodSelector: {
+  cardDashboard: {
+    display: 'flex',
+    gap: 10,
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    marginBottom: 10,
+    marginTop: 20,
+  },
+  card1: {
+    paddingHorizontal: 30,
+    paddingVertical: 10,
+    backgroundColor: '#FA6D6D',
+    width: '48.5%',
+    borderRadius: 15,
+    height: 64,
+    justifyContent: 'center',
+    borderStyle: 'solid',
+    elevation: 5,
+    shadowColor: 'rgba(0, 0, 0, 0.50)',
+  },
+  card2: {
+    paddingHorizontal: 30,
+    paddingVertical: 10,
+    backgroundColor: '#64FEB6',
+    width: '48.5%',
+    borderRadius: 15,
+    height: 64,
+    justifyContent: 'center',
+    elevation: 5,
+    shadowColor: 'rgba(0, 0, 0, 0.50)',
+    borderStyle: 'solid',
+  },
+  card3: {
+    paddingHorizontal: 30,
+    paddingVertical: 10,
+    backgroundColor: '#FDFD8A',
+    width: '100%',
+    borderRadius: 15,
+    height: 64,
+    justifyContent: 'center',
+    marginBottom: 30,
+    elevation: 5,
+    shadowColor: 'rgba(0, 0, 0, 0.50)',
+    borderStyle: 'solid',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  title1: {
+    fontSize: 18,
+    marginTop: 10,
+    marginBottom: 5,
+    color: '#383F66',
+    fontWeight: 500,
+  },
+  filterContainer: {
+    marginVertical: 10,
+  },
+  input: {
+    width: '100%',
+    height: 45,
+    borderColor: 'rgba(0, 0, 0, 0.56)',
+    borderWidth: 1.5,
     marginBottom: 15,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    backgroundColor: '#fff',
   },
-  periodButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#27ae60',
+  button: {
+    backgroundColor: '#003366',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    height: 45
   },
-  periodButtonSelected: {
-    backgroundColor: '#27ae60',
-  },
-  periodButtonText: {
-    color: '#27ae60',
+  buttonText: {
+    color: '#fff',
     fontWeight: 'bold',
   },
-  periodButtonTextSelected: {
-    color: '#fff',
-  },
-  dateFilter: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 15,
-  },
-  dateButton: {
-    borderWidth: 1,
-    borderColor: '#27ae60',
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-  },
-  semDados: {
-    textAlign: 'center',
-    marginTop: 40,
-    fontSize: 16,
-    color: '#666',
-  },
 });
+
+export default DashboardMobile;

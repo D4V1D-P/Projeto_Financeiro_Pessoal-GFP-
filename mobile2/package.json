@@ -1,6 +1,5 @@
 {
-  "name": "p_integrador",
-  "version": "1.0.0",
+  "license": "0BSD",
   "main": "index.js",
   "scripts": {
     "start": "expo start",
@@ -9,21 +8,27 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "'": "file:expo/vector-icons/AntDesign'",
-    "@expo/vector-icons": "^14.1.0",
-    "@react-native-community/datetimepicker": "8.4.1",
-    "@react-native-picker/picker": "^2.11.1",
-    "@react-navigation/bottom-tabs": "^7.3.14",
-    "@react-navigation/native": "^7.1.10",
-    "@react-navigation/native-stack": "*",
-    "expo": "~53.0.10",
+    "expo": "~53.0.17",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",
-    "react-native": "0.79.3",
+    "react-native": "0.79.5",
+    "axios": "*",
+    "date-fns": "*",
+    "expo-font": "~13.3.2",
+    "react-native-svg": "15.11.2",
+    "@expo/vector-icons": "^14.1.0",
+    "react-native-paper": "*",
+    "react-native-screens": "~4.11.1",
     "react-native-chart-kit": "^6.12.0",
     "react-native-mask-text": "^0.15.0",
-    "react-native-svg": "15.11.2",
-    "react-native-toast-message": "^2.3.2"
+    "@react-navigation/native": "^7.1.10",
+    "react-native-vector-icons": "*",
+    "react-native-toast-message": "^2.3.2",
+    "@react-native-picker/picker": "2.11.1",
+    "@react-navigation/bottom-tabs": "^7.3.14",
+    "@react-navigation/native-stack": "*",
+    "react-native-safe-area-context": "5.4.0",
+    "@react-native-community/datetimepicker": "8.4.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

@@ -1,189 +1,255 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { TextInput } from 'react-native';
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+  TextInput,
+} from 'react-native';
+import { KeyboardAvoidingView, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { MaskedTextInput } from 'react-native-mask-text';
+import axios from 'axios';
+import { API_URL } from '../.env';
 
-const SeuApp = () => {
-  const [id_Categoria_saida, setId_Categoria_Saida] = useState([]);
-  const [id_conta, setId_Conta] = useState([]);
-  const [id_Tipo_pagamento, setId_Tipo_Pagamento] = useState([]);
-
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState('');
-  const [contaSelecionada, setContaSelecionada] = useState('');
-  const [pagamentoSelecionado, setPagamentoSelecionado] = useState('');
+const Despesas = () => {
+  const [categoria, setCategoria] = useState('');
   const [valor, setValor] = useState('');
-  const [data, setData] = useState('');
+  const [dataDigitada, setDataDigitada] = useState('');
+  const [data, setData] = useState(''); // formato YYYY-MM-DD
+
   const [descricao, setDescricao] = useState('');
-  const [status, setStatus] = useState('');
+  const [conta, setConta] = useState('');
+  const [pag, setPag] = useState('');
+
+  let uid = 'nxx1YdFKQUd8XSwFE6bnN9mQa422';
+  let id_usuario = 12;
+  const [categorias, setCategorias] = useState([]);
+  const [contas, setContas] = useState([]);
+  const [pagamentos, setPagamentos] = useState([]);
 
   useEffect(() => {
-    fetch('https://apifinanceiropessoal.webapptech.site/api/CategoriaSaida')
-      .then(res => res.json())
-      .then(data => {
-        console.log("categorias", data);
-        setId_Categoria_Saida(Array.isArray(data) ? data : data.data || []);
-      });
+    let params = { uid, id_usuario };
 
-    fetch('https://apifinanceiropessoal.webapptech.site/api/Conta')
-      .then(res => res.json())
-      .then(data => {
-        console.log("contas", data);
-        setId_Conta(Array.isArray(data) ? data : data.data || []);
-      });
-
-    fetch('https://apifinanceiropessoal.webapptech.site/api/tipo_pagamento')
-      .then(res => res.json())
-      .then(data => {
-        console.log("tiposPagamento", data);
-        setId_Tipo_Pagamento(Array.isArray(data) ? data : data.data || []);
-      });
-  }, []);
-
-  const cadastrarDespesas = () => {
-    fetch('https://apifinanceiropessoal.webapptech.site/api/despesas', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id_Categoria_saida: categoriaSelecionada,
-        valor,
-        data,
-        descricao,
-        id_Tipo_pagamento: pagamentoSelecionado,
-        id_conta: contaSelecionada,
-        status
-      })
-    })
-    .then(res => {
-      if (res.ok) {
-        Alert.alert('Sucesso', 'Despesas cadastrada com sucesso!');
-      } else {
-        Alert.alert('Erro', 'Falha ao cadastrar.');
+    const fetchCategoria = async () => {
+      try {
+        const response = await axios.get(
+          `${API_URL}/categorias-saida-usuario`,
+          { params }
+        );
+        setCategorias(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar categorias', error);
       }
-    })
-    .catch(err => {
-      console.error(err);
-      Alert.alert('Erro', 'Falha na conexão com o servidor.');
-    });
+    };
+
+    const fetchConta = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/contas-usuario`, {
+          params,
+        });
+        setContas(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar contas', error);
+      }
+    };
+
+    const fetchPagamentos = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/tipo-pagamento-usuario`, {
+          params,
+        });
+        setPagamentos(response.data);
+      } catch (error) {
+        console.error('Erro ao buscar tipos de pagamento', error);
+      }
+    };
+
+    fetchCategoria();
+    fetchConta();
+    fetchPagamentos();
+  }, [uid, id_usuario]);
+
+  const cadastrarReceita = (e) => {
+    if (!categoria || !conta || !pag) {
+      alert('Preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    e.preventDefault();
+    const novaDespesa = {
+      id_usuario: id_usuario,
+      id_Categoria_saida: categoria,
+      valor,
+      data,
+      descricao,
+      id_Tipo_pagamento: pag,
+      id_conta: conta,
+      status: 'ativo',
+      uid: uid,
+    };
+    console.log(novaDespesa);
+    axios
+      .post(`${API_URL}/despesas`, novaDespesa)
+      .then(() => {
+        alert('despesa adicionada!');
+      })
+      .catch((erro) => {
+        alert('erro ao cadastrar despesa' + erro);
+        console.error(erro);
+      });
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.titulo}>Cadastrar Nova Despesas</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}>
+      <ScrollView style={{backgroundColor: '#fff'}}>
+        <View style={styles.container}>
+          <Text style={styles.titulo}>Cadastrar Nova Despesa</Text>
 
-      <Text style={styles.label}>Categoria:</Text>
-      <View style={styles.inputBox}>
-        <Picker
-          selectedValue={categoriaSelecionada}
-          onValueChange={(itemValue) => setCategoriaSelecionada(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Selecione uma categoria" value="" />
-          {id_Categoria_saida.map((cat) => (
-            <Picker.Item key={cat.id_Categoria_saida}  label={cat.nome} value={cat.id} />
-          ))}
-        </Picker>
-      </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Categoria:</Text>
+            <View style={styles.inputBox}>
+              <Picker
+                selectedValue={categoria}
+                onValueChange={(value) => setCategoria(value)}>
+                <Picker.Item label="Selecione..." value="" />
+                {categorias.map((cat) => (
+                  <Picker.Item
+                    key={cat.id_Categoria_saida}
+                    label={cat.nome}
+                    value={cat.id_Categoria_saida}
+                  />
+                ))}
+              </Picker>
+            </View>
+          </View>
 
-      <Text style={styles.label}>Valor:</Text>
-      <TextInput
-        style={styles.TextInput}
-        placeholder="Preço"
-        keyboardType="numeric"
-        value={valor}
-        onChangeText={setValor}
-      />
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Valor:</Text>
+            <TextInput
+              style={styles.TextInput}
+              placeholder="Preço"
+              keyboardType="numeric"
+              value={valor}
+              onChangeText={setValor}
+            />
+          </View>
 
-      <Text style={styles.label}>Data:</Text>
-      <MaskedTextInput
-        mask="99/99/9999"
-        onChangeText={(text, rawText) => setData(rawText)}
-        style={styles.TextInput}
-        placeholder="Data (DD/MM/AAAA)"
-        keyboardType="numeric"
-        value={data}
-      />
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Data:</Text>
+            <MaskedTextInput
+              mask="99/99/9999"
+              value={dataDigitada}
+              onChangeText={(text, rawText) => {
+                setDataDigitada(text);
 
-      <Text style={styles.label}>Conta:</Text>
-      <View style={styles.inputBox}>
-        <Picker
-          selectedValue={contaSelecionada}
-          onValueChange={(itemValue) => setContaSelecionada(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Selecione uma conta" value="" />
-          {id_conta.map((conta) => (
-            <Picker.Item key={conta.id_conta}  label={conta.banco_nome} value={conta.id} />
-          ))}
-        </Picker>
-      </View>
+                if (rawText.length === 8) {
+                  const dia = rawText.substring(0, 2);
+                  const mes = rawText.substring(2, 4);
+                  const ano = rawText.substring(4, 8);
+                  const dataFormatada = `${ano}-${mes}-${dia}`;
+                  setData(dataFormatada);
+                } else {
+                  setData('');
+                }
+              }}
+              style={styles.TextInput}
+              placeholder="Data (DD/MM/AAAA)"
+              keyboardType="numeric"
+            />
+          </View>
 
-      <Text style={styles.label}>Tipo de Pagamento:</Text>
-      <View style={styles.inputBox}>
-        <Picker
-          selectedValue={pagamentoSelecionado}
-          onValueChange={(itemValue) => setPagamentoSelecionado(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Selecione o tipo de pagamento" value="" />
-          {id_Tipo_pagamento.map((tipo) => (
-            <Picker.Item key={tipo.id_Tipo_pagamento} label={tipo.nome} value={tipo.id} />
-          ))}
-        </Picker>
-      </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Conta:</Text>
+            <View style={styles.inputBox}>
+              <Picker
+                selectedValue={conta}
+                onValueChange={(itemValue) => setConta(itemValue)}>
+                <Picker.Item label="Selecione uma conta" value="" />
+                {contas.map((conta) => (
+                  <Picker.Item
+                    key={conta.id_conta}
+                    label={conta.banco_nome}
+                    value={conta.id_conta}
+                  />
+                ))}
+              </Picker>
+            </View>
+          </View>
 
-      <Text style={styles.label}>Descrição:</Text>
-      <TextInput
-        style={styles.descricao}
-        placeholder="Descrição"
-        value={descricao}
-        onChangeText={setDescricao}
-        multiline
-      />
-      <Text style={styles.label}>Status:</Text>
-      <TextInput
-        style={styles.inputBox}
-        placeholder="Status"
-        value={status}
-        onChangeText={setStatus}
-        multiline
-      />
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Tipo de Pagamento:</Text>
+            <View style={styles.inputBox}>
+              <Picker
+                selectedValue={pag}
+                onValueChange={(itemValue) => setPag(itemValue)}>
+                <Picker.Item label="Selecione o tipo de pagamento" value="" />
+                {pagamentos.map((tipo) => (
+                  <Picker.Item
+                    key={tipo.id_Tipo_pagamento}
+                    label={tipo.nome}
+                    value={tipo.id_Tipo_pagamento}
+                  />
+                ))}
+              </Picker>
+            </View>
+          </View>
 
-      <TouchableOpacity style={styles.butao} onPress={cadastrarDespesas}>
-        <Text style={styles.Cadastrar}>Cadastrar</Text>
-      </TouchableOpacity>
-    </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Descrição:</Text>
+            <TextInput
+              style={styles.descricao}
+              placeholder="Descrição"
+              value={descricao}
+              onChangeText={setDescricao}
+              multiline
+            />
+          </View>
+
+          <TouchableOpacity style={styles.butao} onPress={cadastrarReceita}>
+            <Text style={styles.Cadastrar}>Cadastrar</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { padding: 55 },
-  titulo: {
-    fontSize: 25,
-    fontWeight: 'bold',
-    marginBottom: 70
-  },
+  container: { padding: 25, backgroundColor: '#fff' },
+  titulo: { fontSize: 20, fontWeight: 500, marginBottom: 40 },
+
   label: {
-    fontSize: 16,
-    marginBottom: 5
+    position: 'absolute',
+    top: -10,
+    left: 15,
+    fontSize: 15,
+    zIndex: 1,
+    backgroundColor: '#fff', // mesma cor do fundo do input
+    paddingHorizontal: 10,
+    width: 'auto', // deixa o tamanho conforme o texto
   },
   inputBox: {
     borderWidth: 1.5,
-    borderColor: 'black',
+    borderColor: 'rgba(0, 0, 0, 0.56)',
     borderRadius: 12,
     marginBottom: 15,
     backgroundColor: '#fff',
-    height: 50,
-    justifyContent: 'center'
+    height: 45,
+    justifyContent: 'center',
   },
-  picker: {
-    height: 50,
-    width: '100%',
+  inputContainer: {
+    position: 'relative',
+    marginBottom: 15,
   },
   TextInput: {
     width: '100%',
     height: 45,
-    borderColor: 'black',
+    borderColor: 'rgba(0, 0, 0, 0.56)',
     borderWidth: 1.5,
     marginBottom: 15,
     borderRadius: 12,
@@ -193,7 +259,7 @@ const styles = StyleSheet.create({
   descricao: {
     width: '100%',
     height: 100,
-    borderColor: 'black',
+    borderColor: 'rgba(0, 0, 0, 0.56)',
     borderWidth: 1.5,
     marginBottom: 10,
     paddingHorizontal: 10,
@@ -208,11 +274,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 12,
   },
-  Cadastrar: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
+  Cadastrar: { color: '#fff', fontSize: 15, fontWeight: 'bold' },
 });
 
-export default SeuApp;
+export default Despesas;
